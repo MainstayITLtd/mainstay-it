@@ -7,10 +7,18 @@ export default function Home() {
   ];
 
   return (
-    <main className="min-h-screen bg-black text-white">
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.12),transparent_30%)]" />
+    <main className="relative min-h-screen overflow-hidden bg-black text-white">
+
+      {/* 🔥 Animated background */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute left-[-10%] top-[-10%] h-[500px] w-[500px] animate-pulse rounded-full bg-white/10 blur-[120px]" />
+        <div className="absolute right-[-10%] top-[30%] h-[450px] w-[450px] animate-pulse rounded-full bg-blue-500/10 blur-[140px]" />
+        <div className="absolute bottom-[-15%] left-[35%] h-[500px] w-[500px] animate-pulse rounded-full bg-emerald-500/10 blur-[150px]" />
+      </div>
 
       <div className="mx-auto max-w-7xl px-6 py-8">
+
+        {/* Header */}
         <header className="mb-24 flex items-center justify-between">
           <img
             src="/Logo%20290426.jpeg"
@@ -26,6 +34,7 @@ export default function Home() {
           </a>
         </header>
 
+        {/* Hero */}
         <section className="grid items-center gap-14 pb-24 pt-10 lg:grid-cols-2">
           <div>
             <p className="mb-5 inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-300">
@@ -83,80 +92,56 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Trust */}
         <section className="py-16">
-          <p className="mb-4 text-sm font-semibold uppercase tracking-[0.3em] text-zinc-500">
-            Trusted IT Support
-          </p>
-
-          <h3 className="max-w-3xl text-3xl font-bold tracking-tight md:text-4xl">
-            Supporting businesses across Norwich and surrounding areas.
-          </h3>
-
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-4 text-center">
             {[
-              ["Fast response times", "Quick, straightforward support when your business needs help."],
-              ["Security-first approach", "Protection built into every setup, from Microsoft 365 to endpoint security."],
-              ["Clear, honest advice", "No jargon, no unnecessary upselling — just practical IT support that works."],
+              ["Norwich", "Local IT support"],
+              ["Fast", "Response times"],
+              ["Secure", "Security-first"],
+              ["Microsoft 365", "Specialists"],
             ].map(([title, text]) => (
-              <div key={title} className="rounded-3xl border border-white/10 bg-white/[0.05] p-7">
-                <h4 className="text-xl font-bold">{title}</h4>
-                <p className="mt-3 text-sm leading-6 text-zinc-400">{text}</p>
+              <div key={title} className="rounded-3xl border border-white/10 bg-white/[0.05] p-6">
+                <p className="text-2xl font-bold">{title}</p>
+                <p className="mt-1 text-sm text-zinc-400">{text}</p>
               </div>
             ))}
           </div>
         </section>
 
+        {/* Services */}
         <section id="services" className="py-20">
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-zinc-500">
             Services
           </p>
+
           <h2 className="mt-4 max-w-3xl text-4xl font-bold tracking-tight md:text-5xl">
             Practical IT services that keep your business moving.
           </h2>
 
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {services.map(([title, text]) => (
-              <div
-                key={title}
-                className="rounded-3xl border border-white/10 bg-white/[0.05] p-6 transition hover:-translate-y-1 hover:bg-white/[0.09]"
-              >
-                <div className="mb-5 h-10 w-10 rounded-2xl bg-white/10" />
+              <div key={title} className="rounded-3xl border border-white/10 bg-white/[0.05] p-6 hover:-translate-y-1 transition">
                 <h3 className="text-xl font-bold">{title}</h3>
-                <p className="mt-4 text-sm leading-6 text-zinc-400">{text}</p>
+                <p className="mt-4 text-sm text-zinc-400">{text}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="grid gap-8 py-20 lg:grid-cols-3">
-          {[
-            ["Fast response", "Clear, straightforward support when your team needs help."],
-            ["Security focused", "Every setup is reviewed with protection and resilience in mind."],
-            ["Business ready", "Support that scales as your systems, users and requirements grow."],
-          ].map(([title, text]) => (
-            <div key={title} className="rounded-3xl bg-zinc-950 p-7">
-              <h3 className="text-2xl font-bold">{title}</h3>
-              <p className="mt-3 leading-7 text-zinc-400">{text}</p>
-            </div>
-          ))}
-        </section>
-
+        {/* Contact */}
         <section id="contact" className="mb-20 rounded-[2rem] bg-white p-8 text-black md:p-12">
-          <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
+          <div className="grid gap-10 lg:grid-cols-2">
+
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-zinc-500">
-                Contact
-              </p>
-              <h2 className="mt-4 text-4xl font-bold tracking-tight">
-                Speak to Mainstay IT
-              </h2>
-              <p className="mt-5 max-w-xl leading-7 text-zinc-700">
-                Fill in the form and we’ll get back to you quickly to discuss your IT support requirements.
+              <h2 className="text-4xl font-bold">Speak to Mainstay IT</h2>
+              <p className="mt-4 text-zinc-700">
+                Fill in the form and we’ll get back to you quickly.
               </p>
 
-              <div className="mt-8 rounded-3xl bg-zinc-100 p-6">
-                <p className="mb-3"><strong>Email:</strong> support@mainstayit.co.uk</p>
-                <p className="mb-3"><strong>Phone:</strong> 07531 993944</p>
+              <div className="mt-6 text-sm">
+                <p><strong>Email:</strong> support@mainstayit.co.uk</p>
+                <p><strong>Phone:</strong> 07531 993944</p>
                 <p><strong>Location:</strong> Norwich</p>
               </div>
             </div>
@@ -166,45 +151,18 @@ export default function Home() {
               method="POST"
               className="space-y-4"
             >
-              <input
-                type="text"
-                name="name"
-                placeholder="Your name"
-                required
-                className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black"
-              />
+              <input name="name" required placeholder="Your name" className="w-full rounded-xl border px-4 py-3" />
+              <input name="email" type="email" required placeholder="Email address" className="w-full rounded-xl border px-4 py-3" />
+              <textarea name="message" required placeholder="How can we help?" className="w-full rounded-xl border px-4 py-3 h-32" />
 
-              <input
-                type="email"
-                name="email"
-                placeholder="Email address"
-                required
-                className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black"
-              />
-
-              <input
-                type="text"
-                name="company"
-                placeholder="Company name"
-                className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black"
-              />
-
-              <textarea
-                name="message"
-                placeholder="How can we help?"
-                required
-                className="h-36 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black"
-              />
-
-              <button
-                type="submit"
-                className="w-full rounded-full bg-black px-6 py-3 font-semibold text-white hover:bg-zinc-800"
-              >
+              <button className="w-full bg-black text-white py-3 rounded-full font-semibold">
                 Send enquiry
               </button>
             </form>
+
           </div>
         </section>
+
       </div>
     </main>
   );
