@@ -14,7 +14,7 @@ export default function Home() {
         <header className="mb-24 flex items-center justify-between">
           <img
             src="/Logo%20290426.jpeg"
-            className="h-16 w-auto drop-shadow-[0_0_14px_rgba(255,255,255,0.22)] md:h-20"
+            className="h-20 w-auto drop-shadow-[0_0_14px_rgba(255,255,255,0.22)] md:h-24"
             alt="Mainstay IT"
           />
 
@@ -26,14 +26,14 @@ export default function Home() {
           </a>
         </header>
 
-        <section className="grid items-center gap-14 pb-24 lg:grid-cols-2">
+        <section className="grid items-center gap-14 pb-24 pt-10 lg:grid-cols-2">
           <div>
             <p className="mb-5 inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-300">
               Norwich-based IT support for growing businesses
             </p>
 
             <h1 className="max-w-4xl text-6xl font-bold leading-[1.05] tracking-tight md:text-7xl">
-              Reliable IT support with security built in.
+              Reliable IT support for businesses that can’t afford downtime.
             </h1>
 
             <p className="mt-7 max-w-2xl text-lg leading-8 text-zinc-300">
@@ -80,6 +80,29 @@ export default function Home() {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+
+        <section className="py-16">
+          <p className="mb-4 text-sm font-semibold uppercase tracking-[0.3em] text-zinc-500">
+            Trusted IT Support
+          </p>
+
+          <h3 className="max-w-3xl text-3xl font-bold tracking-tight md:text-4xl">
+            Supporting businesses across Norwich and surrounding areas.
+          </h3>
+
+          <div className="mt-10 grid gap-6 md:grid-cols-3">
+            {[
+              ["Fast response times", "Quick, straightforward support when your business needs help."],
+              ["Security-first approach", "Protection built into every setup, from Microsoft 365 to endpoint security."],
+              ["Clear, honest advice", "No jargon, no unnecessary upselling — just practical IT support that works."],
+            ].map(([title, text]) => (
+              <div key={title} className="rounded-3xl border border-white/10 bg-white/[0.05] p-7">
+                <h4 className="text-xl font-bold">{title}</h4>
+                <p className="mt-3 text-sm leading-6 text-zinc-400">{text}</p>
+              </div>
+            ))}
           </div>
         </section>
 
