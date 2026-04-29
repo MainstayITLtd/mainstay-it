@@ -42,7 +42,7 @@ export default function Home() {
 
             <div className="mt-9 flex flex-col gap-4 sm:flex-row">
               <a
-                href="mailto:support@mainstayit.co.uk"
+                href="#contact"
                 className="rounded-full bg-white px-7 py-3 text-center font-semibold text-black hover:bg-zinc-200"
               >
                 Get support
@@ -141,31 +141,68 @@ export default function Home() {
           ))}
         </section>
 
-        <section className="mb-20 rounded-[2rem] bg-white p-8 text-black md:p-12">
-          <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
+        <section id="contact" className="mb-20 rounded-[2rem] bg-white p-8 text-black md:p-12">
+          <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.25em] text-zinc-500">
                 Contact
               </p>
               <h2 className="mt-4 text-4xl font-bold tracking-tight">
-                Ready to improve your IT support?
+                Speak to Mainstay IT
               </h2>
               <p className="mt-5 max-w-xl leading-7 text-zinc-700">
-                Speak to Mainstay IT about managed support, Microsoft 365, cyber security, backups or a smooth transition from your current provider.
+                Fill in the form and we’ll get back to you quickly to discuss your IT support requirements.
               </p>
+
+              <div className="mt-8 rounded-3xl bg-zinc-100 p-6">
+                <p className="mb-3"><strong>Email:</strong> support@mainstayit.co.uk</p>
+                <p className="mb-3"><strong>Phone:</strong> 07531 993944</p>
+                <p><strong>Location:</strong> Norwich</p>
+              </div>
             </div>
 
-            <div className="rounded-3xl bg-zinc-100 p-6">
-              <p className="mb-3"><strong>Email:</strong> support@mainstayit.co.uk</p>
-              <p className="mb-3"><strong>Phone:</strong> 07531 993944</p>
-              <p className="mb-6"><strong>Location:</strong> Norwich</p>
-              <a
-                href="mailto:support@mainstayit.co.uk"
-                className="block rounded-full bg-black px-6 py-3 text-center font-semibold text-white hover:bg-zinc-800"
+            <form
+              action="https://formspree.io/f/xrernwkk"
+              method="POST"
+              className="space-y-4"
+            >
+              <input
+                type="text"
+                name="name"
+                placeholder="Your name"
+                required
+                className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black"
+              />
+
+              <input
+                type="email"
+                name="email"
+                placeholder="Email address"
+                required
+                className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black"
+              />
+
+              <input
+                type="text"
+                name="company"
+                placeholder="Company name"
+                className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black"
+              />
+
+              <textarea
+                name="message"
+                placeholder="How can we help?"
+                required
+                className="h-36 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black"
+              />
+
+              <button
+                type="submit"
+                className="w-full rounded-full bg-black px-6 py-3 font-semibold text-white hover:bg-zinc-800"
               >
-                Contact Mainstay IT
-              </a>
-            </div>
+                Send enquiry
+              </button>
+            </form>
           </div>
         </section>
       </div>
