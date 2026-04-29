@@ -1,47 +1,55 @@
 export default function Home() {
   const services = [
-    ["Managed IT Support", "Responsive day-to-day support for users, devices, servers and business systems."],
-    ["Cyber Security", "MFA, endpoint protection, secure email, monitoring and practical security improvements."],
-    ["Microsoft 365", "Licensing, migrations, SharePoint, OneDrive, Teams and security configuration."],
-    ["Backups & Infrastructure", "Cloud backups, server support, networking and disaster recovery planning."],
+    ["Managed IT Support", "Fast, practical support for users, devices, servers and business systems."],
+    ["Cyber Security", "MFA, endpoint protection, email security, monitoring and risk reduction."],
+    ["Microsoft 365", "Licensing, migrations, SharePoint, OneDrive, Teams and secure configuration."],
+    ["Backup & Recovery", "Cloud backups, recovery planning, continuity checks and infrastructure support."],
+  ];
+
+  const trust = [
+    ["Norwich", "Local IT support"],
+    ["Fast", "Responsive service"],
+    ["Secure", "Security-first setup"],
+    ["Microsoft 365", "Specialists"],
   ];
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-black text-white">
-
-      {/* 🔥 Animated background */}
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute left-[-10%] top-[-10%] h-[500px] w-[500px] animate-pulse rounded-full bg-white/10 blur-[120px]" />
-        <div className="absolute right-[-10%] top-[30%] h-[450px] w-[450px] animate-pulse rounded-full bg-blue-500/10 blur-[140px]" />
-        <div className="absolute bottom-[-15%] left-[35%] h-[500px] w-[500px] animate-pulse rounded-full bg-emerald-500/10 blur-[150px]" />
+      {/* Premium animated background */}
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <div className="absolute left-[-20%] top-[-20%] h-[800px] w-[800px] animate-pulse rounded-full bg-blue-500/20 blur-[170px]" />
+        <div className="absolute right-[-20%] top-[15%] h-[760px] w-[760px] animate-pulse rounded-full bg-emerald-400/15 blur-[180px]" />
+        <div className="absolute bottom-[-25%] left-[25%] h-[850px] w-[850px] animate-pulse rounded-full bg-white/10 blur-[190px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:72px_72px] opacity-20" />
       </div>
 
-      <div className="mx-auto max-w-7xl px-6 py-8">
-
+      <div className="relative z-10 mx-auto max-w-7xl px-6 py-8">
         {/* Header */}
         <header className="mb-24 flex items-center justify-between">
-          <img
-            src="/Logo%20290426.jpeg"
-            className="h-20 w-auto drop-shadow-[0_0_14px_rgba(255,255,255,0.22)] md:h-24"
-            alt="Mainstay IT"
-          />
+          <a href="#" aria-label="Mainstay IT home">
+            <img
+              src="/Logo%20290426.jpeg"
+              className="h-20 w-auto drop-shadow-[0_0_22px_rgba(255,255,255,0.25)] md:h-24"
+              alt="Mainstay IT"
+            />
+          </a>
 
           <a
             href="tel:07531993944"
-            className="rounded-full border border-white/15 px-5 py-2 text-sm text-zinc-200 hover:bg-white hover:text-black"
+            className="rounded-full border border-white/15 bg-white/5 px-5 py-2 text-sm font-medium text-zinc-100 backdrop-blur hover:bg-white hover:text-black"
           >
             07531 993944
           </a>
         </header>
 
         {/* Hero */}
-        <section className="grid items-center gap-14 pb-24 pt-10 lg:grid-cols-2">
+        <section className="grid items-center gap-14 pb-24 pt-8 lg:grid-cols-2">
           <div>
-            <p className="mb-5 inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-300">
+            <p className="mb-5 inline-flex rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm text-zinc-200 shadow-xl backdrop-blur">
               Norwich-based IT support for growing businesses
             </p>
 
-            <h1 className="max-w-4xl text-6xl font-bold leading-[1.05] tracking-tight md:text-7xl">
+            <h1 className="max-w-5xl text-6xl font-bold leading-[1.02] tracking-tight md:text-7xl">
               Reliable IT support for businesses that can’t afford downtime.
             </h1>
 
@@ -52,21 +60,21 @@ export default function Home() {
             <div className="mt-9 flex flex-col gap-4 sm:flex-row">
               <a
                 href="#contact"
-                className="rounded-full bg-white px-7 py-3 text-center font-semibold text-black hover:bg-zinc-200"
+                className="rounded-full bg-white px-7 py-3 text-center font-semibold text-black shadow-xl hover:bg-zinc-200"
               >
                 Get support
               </a>
               <a
                 href="#services"
-                className="rounded-full border border-white/15 px-7 py-3 text-center font-semibold text-white hover:bg-white/10"
+                className="rounded-full border border-white/15 bg-white/5 px-7 py-3 text-center font-semibold text-white backdrop-blur hover:bg-white/10"
               >
                 View services
               </a>
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-white/10 bg-white/[0.06] p-8 shadow-2xl backdrop-blur">
-            <div className="mb-8 flex items-center justify-between">
+          <div className="rounded-[2rem] border border-white/10 bg-white/[0.07] p-8 shadow-2xl backdrop-blur-xl">
+            <div className="mb-8 flex items-center justify-between gap-6">
               <div>
                 <p className="text-sm text-zinc-400">Business protection</p>
                 <p className="mt-1 text-3xl font-bold">Secure. Supported. Simple.</p>
@@ -83,7 +91,10 @@ export default function Home() {
                 "Backup and recovery planning",
                 "Remote and onsite support",
               ].map((item) => (
-                <div key={item} className="flex items-center justify-between rounded-2xl bg-black/35 p-4">
+                <div
+                  key={item}
+                  className="flex items-center justify-between rounded-2xl border border-white/5 bg-black/35 p-4"
+                >
                   <span className="text-zinc-200">{item}</span>
                   <span className="text-emerald-300">✓</span>
                 </div>
@@ -92,16 +103,11 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Trust */}
-        <section className="py-16">
-          <div className="grid gap-6 md:grid-cols-4 text-center">
-            {[
-              ["Norwich", "Local IT support"],
-              ["Fast", "Response times"],
-              ["Secure", "Security-first"],
-              ["Microsoft 365", "Specialists"],
-            ].map(([title, text]) => (
-              <div key={title} className="rounded-3xl border border-white/10 bg-white/[0.05] p-6">
+        {/* Trust bar */}
+        <section className="py-10">
+          <div className="grid gap-4 rounded-[2rem] border border-white/10 bg-white/[0.04] p-4 backdrop-blur md:grid-cols-4">
+            {trust.map(([title, text]) => (
+              <div key={title} className="rounded-3xl bg-black/25 p-6 text-center">
                 <p className="text-2xl font-bold">{title}</p>
                 <p className="mt-1 text-sm text-zinc-400">{text}</p>
               </div>
@@ -110,7 +116,7 @@ export default function Home() {
         </section>
 
         {/* Services */}
-        <section id="services" className="py-20">
+        <section id="services" className="py-24">
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-zinc-500">
             Services
           </p>
@@ -121,27 +127,55 @@ export default function Home() {
 
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {services.map(([title, text]) => (
-              <div key={title} className="rounded-3xl border border-white/10 bg-white/[0.05] p-6 hover:-translate-y-1 transition">
+              <div
+                key={title}
+                className="group rounded-3xl border border-white/10 bg-white/[0.05] p-7 backdrop-blur transition hover:-translate-y-1 hover:bg-white/[0.09]"
+              >
+                <div className="mb-6 h-11 w-11 rounded-2xl bg-white/10 transition group-hover:bg-white/20" />
                 <h3 className="text-xl font-bold">{title}</h3>
-                <p className="mt-4 text-sm text-zinc-400">{text}</p>
+                <p className="mt-4 text-sm leading-6 text-zinc-400">{text}</p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Contact */}
-        <section id="contact" className="mb-20 rounded-[2rem] bg-white p-8 text-black md:p-12">
-          <div className="grid gap-10 lg:grid-cols-2">
+        {/* Value section */}
+        <section className="grid gap-8 py-20 lg:grid-cols-3">
+          {[
+            ["Fast response", "Clear, straightforward support when your team needs help."],
+            ["Security focused", "Every setup is reviewed with protection and resilience in mind."],
+            ["Business ready", "Support that scales as your systems, users and requirements grow."],
+          ].map(([title, text]) => (
+            <div
+              key={title}
+              className="rounded-[2rem] border border-white/10 bg-zinc-950/80 p-8 backdrop-blur"
+            >
+              <h3 className="text-2xl font-bold">{title}</h3>
+              <p className="mt-3 leading-7 text-zinc-400">{text}</p>
+            </div>
+          ))}
+        </section>
 
+        {/* Contact */}
+        <section
+          id="contact"
+          className="mb-20 rounded-[2rem] border border-white/10 bg-white p-8 text-black shadow-2xl md:p-12"
+        >
+          <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
             <div>
-              <h2 className="text-4xl font-bold">Speak to Mainstay IT</h2>
-              <p className="mt-4 text-zinc-700">
-                Fill in the form and we’ll get back to you quickly.
+              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-zinc-500">
+                Contact
+              </p>
+              <h2 className="mt-4 text-4xl font-bold tracking-tight">
+                Speak to Mainstay IT
+              </h2>
+              <p className="mt-5 max-w-xl leading-7 text-zinc-700">
+                Fill in the form and we’ll get back to you quickly to discuss your IT support requirements.
               </p>
 
-              <div className="mt-6 text-sm">
-                <p><strong>Email:</strong> support@mainstayit.co.uk</p>
-                <p><strong>Phone:</strong> 07531 993944</p>
+              <div className="mt-8 rounded-3xl bg-zinc-100 p-6">
+                <p className="mb-3"><strong>Email:</strong> support@mainstayit.co.uk</p>
+                <p className="mb-3"><strong>Phone:</strong> 07531 993944</p>
                 <p><strong>Location:</strong> Norwich</p>
               </div>
             </div>
@@ -151,18 +185,45 @@ export default function Home() {
               method="POST"
               className="space-y-4"
             >
-              <input name="name" required placeholder="Your name" className="w-full rounded-xl border px-4 py-3" />
-              <input name="email" type="email" required placeholder="Email address" className="w-full rounded-xl border px-4 py-3" />
-              <textarea name="message" required placeholder="How can we help?" className="w-full rounded-xl border px-4 py-3 h-32" />
+              <input
+                type="text"
+                name="name"
+                placeholder="Your name"
+                required
+                className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black"
+              />
 
-              <button className="w-full bg-black text-white py-3 rounded-full font-semibold">
+              <input
+                type="email"
+                name="email"
+                placeholder="Email address"
+                required
+                className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black"
+              />
+
+              <input
+                type="text"
+                name="company"
+                placeholder="Company name"
+                className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black"
+              />
+
+              <textarea
+                name="message"
+                placeholder="How can we help?"
+                required
+                className="h-36 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black"
+              />
+
+              <button
+                type="submit"
+                className="w-full rounded-full bg-black px-6 py-3 font-semibold text-white hover:bg-zinc-800"
+              >
                 Send enquiry
               </button>
             </form>
-
           </div>
         </section>
-
       </div>
     </main>
   );
