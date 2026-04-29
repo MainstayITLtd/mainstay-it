@@ -15,24 +15,49 @@ export default function Home() {
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-black text-white">
-      {/* Premium animated background */}
+      <style>{`
+        @keyframes floatOne {
+          0% { transform: translate3d(0, 0, 0) scale(1); }
+          50% { transform: translate3d(90px, 70px, 0) scale(1.08); }
+          100% { transform: translate3d(0, 0, 0) scale(1); }
+        }
+
+        @keyframes floatTwo {
+          0% { transform: translate3d(0, 0, 0) scale(1); }
+          50% { transform: translate3d(-80px, 60px, 0) scale(1.12); }
+          100% { transform: translate3d(0, 0, 0) scale(1); }
+        }
+
+        @keyframes floatThree {
+          0% { transform: translate3d(0, 0, 0) scale(1); }
+          50% { transform: translate3d(60px, -80px, 0) scale(1.06); }
+          100% { transform: translate3d(0, 0, 0) scale(1); }
+        }
+      `}</style>
+
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div className="absolute left-[-20%] top-[-20%] h-[800px] w-[800px] animate-pulse rounded-full bg-blue-500/20 blur-[170px]" />
-        <div className="absolute right-[-20%] top-[15%] h-[760px] w-[760px] animate-pulse rounded-full bg-emerald-400/15 blur-[180px]" />
-        <div className="absolute bottom-[-25%] left-[25%] h-[850px] w-[850px] animate-pulse rounded-full bg-white/10 blur-[190px]" />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:72px_72px] opacity-20" />
+        <div
+          className="absolute left-[-18%] top-[-18%] h-[850px] w-[850px] rounded-full bg-blue-500/18 blur-[180px]"
+          style={{ animation: "floatOne 18s ease-in-out infinite" }}
+        />
+        <div
+          className="absolute right-[-18%] top-[12%] h-[780px] w-[780px] rounded-full bg-emerald-400/14 blur-[190px]"
+          style={{ animation: "floatTwo 22s ease-in-out infinite" }}
+        />
+        <div
+          className="absolute bottom-[-28%] left-[25%] h-[850px] w-[850px] rounded-full bg-white/10 blur-[200px]"
+          style={{ animation: "floatThree 26s ease-in-out infinite" }}
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:90px_90px] opacity-20" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-8">
-        {/* Header */}
         <header className="mb-24 flex items-center justify-between">
-          <a href="#" aria-label="Mainstay IT home">
-            <img
-              src="/Logo%20290426.jpeg"
-              className="h-20 w-auto drop-shadow-[0_0_22px_rgba(255,255,255,0.25)] md:h-24"
-              alt="Mainstay IT"
-            />
-          </a>
+          <img
+            src="/Logo%20290426.jpeg"
+            className="h-20 w-auto drop-shadow-[0_0_22px_rgba(255,255,255,0.25)] md:h-24"
+            alt="Mainstay IT"
+          />
 
           <a
             href="tel:07531993944"
@@ -42,7 +67,6 @@ export default function Home() {
           </a>
         </header>
 
-        {/* Hero */}
         <section className="grid items-center gap-14 pb-24 pt-8 lg:grid-cols-2">
           <div>
             <p className="mb-5 inline-flex rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm text-zinc-200 shadow-xl backdrop-blur">
@@ -58,16 +82,10 @@ export default function Home() {
             </p>
 
             <div className="mt-9 flex flex-col gap-4 sm:flex-row">
-              <a
-                href="#contact"
-                className="rounded-full bg-white px-7 py-3 text-center font-semibold text-black shadow-xl hover:bg-zinc-200"
-              >
+              <a href="#contact" className="rounded-full bg-white px-7 py-3 text-center font-semibold text-black shadow-xl hover:bg-zinc-200">
                 Get support
               </a>
-              <a
-                href="#services"
-                className="rounded-full border border-white/15 bg-white/5 px-7 py-3 text-center font-semibold text-white backdrop-blur hover:bg-white/10"
-              >
+              <a href="#services" className="rounded-full border border-white/15 bg-white/5 px-7 py-3 text-center font-semibold text-white backdrop-blur hover:bg-white/10">
                 View services
               </a>
             </div>
@@ -91,10 +109,7 @@ export default function Home() {
                 "Backup and recovery planning",
                 "Remote and onsite support",
               ].map((item) => (
-                <div
-                  key={item}
-                  className="flex items-center justify-between rounded-2xl border border-white/5 bg-black/35 p-4"
-                >
+                <div key={item} className="flex items-center justify-between rounded-2xl border border-white/5 bg-black/35 p-4">
                   <span className="text-zinc-200">{item}</span>
                   <span className="text-emerald-300">✓</span>
                 </div>
@@ -103,7 +118,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Trust bar */}
         <section className="py-10">
           <div className="grid gap-4 rounded-[2rem] border border-white/10 bg-white/[0.04] p-4 backdrop-blur md:grid-cols-4">
             {trust.map(([title, text]) => (
@@ -115,23 +129,15 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Services */}
         <section id="services" className="py-24">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-zinc-500">
-            Services
-          </p>
-
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-zinc-500">Services</p>
           <h2 className="mt-4 max-w-3xl text-4xl font-bold tracking-tight md:text-5xl">
             Practical IT services that keep your business moving.
           </h2>
 
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {services.map(([title, text]) => (
-              <div
-                key={title}
-                className="group rounded-3xl border border-white/10 bg-white/[0.05] p-7 backdrop-blur transition hover:-translate-y-1 hover:bg-white/[0.09]"
-              >
-                <div className="mb-6 h-11 w-11 rounded-2xl bg-white/10 transition group-hover:bg-white/20" />
+              <div key={title} className="rounded-3xl border border-white/10 bg-white/[0.05] p-7 backdrop-blur transition hover:-translate-y-1 hover:bg-white/[0.09]">
                 <h3 className="text-xl font-bold">{title}</h3>
                 <p className="mt-4 text-sm leading-6 text-zinc-400">{text}</p>
               </div>
@@ -139,36 +145,11 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Value section */}
-        <section className="grid gap-8 py-20 lg:grid-cols-3">
-          {[
-            ["Fast response", "Clear, straightforward support when your team needs help."],
-            ["Security focused", "Every setup is reviewed with protection and resilience in mind."],
-            ["Business ready", "Support that scales as your systems, users and requirements grow."],
-          ].map(([title, text]) => (
-            <div
-              key={title}
-              className="rounded-[2rem] border border-white/10 bg-zinc-950/80 p-8 backdrop-blur"
-            >
-              <h3 className="text-2xl font-bold">{title}</h3>
-              <p className="mt-3 leading-7 text-zinc-400">{text}</p>
-            </div>
-          ))}
-        </section>
-
-        {/* Contact */}
-        <section
-          id="contact"
-          className="mb-20 rounded-[2rem] border border-white/10 bg-white p-8 text-black shadow-2xl md:p-12"
-        >
+        <section id="contact" className="mb-20 rounded-[2rem] border border-white/10 bg-white p-8 text-black shadow-2xl md:p-12">
           <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-zinc-500">
-                Contact
-              </p>
-              <h2 className="mt-4 text-4xl font-bold tracking-tight">
-                Speak to Mainstay IT
-              </h2>
+              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-zinc-500">Contact</p>
+              <h2 className="mt-4 text-4xl font-bold tracking-tight">Speak to Mainstay IT</h2>
               <p className="mt-5 max-w-xl leading-7 text-zinc-700">
                 Fill in the form and we’ll get back to you quickly to discuss your IT support requirements.
               </p>
@@ -180,45 +161,13 @@ export default function Home() {
               </div>
             </div>
 
-            <form
-              action="https://formspree.io/f/xrernwkk"
-              method="POST"
-              className="space-y-4"
-            >
-              <input
-                type="text"
-                name="name"
-                placeholder="Your name"
-                required
-                className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black"
-              />
+            <form action="https://formspree.io/f/xrernwkk" method="POST" className="space-y-4">
+              <input type="text" name="name" placeholder="Your name" required className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black" />
+              <input type="email" name="email" placeholder="Email address" required className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black" />
+              <input type="text" name="company" placeholder="Company name" className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black" />
+              <textarea name="message" placeholder="How can we help?" required className="h-36 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black" />
 
-              <input
-                type="email"
-                name="email"
-                placeholder="Email address"
-                required
-                className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black"
-              />
-
-              <input
-                type="text"
-                name="company"
-                placeholder="Company name"
-                className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black"
-              />
-
-              <textarea
-                name="message"
-                placeholder="How can we help?"
-                required
-                className="h-36 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black"
-              />
-
-              <button
-                type="submit"
-                className="w-full rounded-full bg-black px-6 py-3 font-semibold text-white hover:bg-zinc-800"
-              >
+              <button type="submit" className="w-full rounded-full bg-black px-6 py-3 font-semibold text-white hover:bg-zinc-800">
                 Send enquiry
               </button>
             </form>
