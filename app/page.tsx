@@ -21,13 +21,11 @@ export default function Home() {
           50% { transform: translate3d(90px, 70px, 0) scale(1.08); }
           100% { transform: translate3d(0, 0, 0) scale(1); }
         }
-
         @keyframes floatTwo {
           0% { transform: translate3d(0, 0, 0) scale(1); }
           50% { transform: translate3d(-80px, 60px, 0) scale(1.12); }
           100% { transform: translate3d(0, 0, 0) scale(1); }
         }
-
         @keyframes floatThree {
           0% { transform: translate3d(0, 0, 0) scale(1); }
           50% { transform: translate3d(60px, -80px, 0) scale(1.06); }
@@ -36,35 +34,24 @@ export default function Home() {
       `}</style>
 
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div
-          className="absolute left-[-18%] top-[-18%] h-[850px] w-[850px] rounded-full bg-blue-500/18 blur-[180px]"
-          style={{ animation: "floatOne 18s ease-in-out infinite" }}
-        />
-        <div
-          className="absolute right-[-18%] top-[12%] h-[780px] w-[780px] rounded-full bg-emerald-400/14 blur-[190px]"
-          style={{ animation: "floatTwo 22s ease-in-out infinite" }}
-        />
-        <div
-          className="absolute bottom-[-28%] left-[25%] h-[850px] w-[850px] rounded-full bg-white/10 blur-[200px]"
-          style={{ animation: "floatThree 26s ease-in-out infinite" }}
-        />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:90px_90px] opacity-20" />
+        <div className="absolute left-[-18%] top-[-18%] h-[850px] w-[850px] rounded-full bg-blue-500/18 blur-[180px]" style={{ animation: "floatOne 18s ease-in-out infinite" }} />
+        <div className="absolute right-[-18%] top-[12%] h-[780px] w-[780px] rounded-full bg-emerald-400/14 blur-[190px]" style={{ animation: "floatTwo 22s ease-in-out infinite" }} />
+        <div className="absolute bottom-[-28%] left-[25%] h-[850px] w-[850px] rounded-full bg-white/10 blur-[200px]" style={{ animation: "floatThree 26s ease-in-out infinite" }} />
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-8">
-        <header className="mb-24 flex items-center justify-between">
-          <img
-            src="/Logo%20290426.jpeg"
-            className="h-20 w-auto drop-shadow-[0_0_22px_rgba(255,255,255,0.25)] md:h-24"
-            alt="Mainstay IT"
-          />
+        <header className="mb-24 flex items-center justify-between gap-6">
+          <img src="/Logo%20290426.jpeg" className="h-20 w-auto drop-shadow-[0_0_22px_rgba(255,255,255,0.25)] md:h-24" alt="Mainstay IT" />
 
-          <a
-            href="tel:07531993944"
-            className="rounded-full border border-white/15 bg-white/5 px-5 py-2 text-sm font-medium text-zinc-100 backdrop-blur hover:bg-white hover:text-black"
-          >
-            07531 993944
-          </a>
+          <div className="flex items-center gap-4">
+            <a href="/client-login" className="hidden text-sm text-zinc-400 hover:text-white md:block">
+              Client Portal
+            </a>
+
+            <a href="tel:07531993944" className="rounded-full border border-white/15 bg-white/5 px-5 py-2 text-sm font-medium text-zinc-100 backdrop-blur hover:bg-white hover:text-black">
+              07531 993944
+            </a>
+          </div>
         </header>
 
         <section className="grid items-center gap-14 pb-24 pt-8 lg:grid-cols-2">
@@ -173,6 +160,15 @@ export default function Home() {
             </form>
           </div>
         </section>
+
+        <footer className="border-t border-white/10 py-8 text-sm text-zinc-500">
+          <div className="flex flex-col justify-between gap-4 md:flex-row">
+            <p>© Mainstay IT. Business IT support in Norwich.</p>
+            <a href="/client-login" className="hover:text-white">
+              Client Portal
+            </a>
+          </div>
+        </footer>
       </div>
     </main>
   );
