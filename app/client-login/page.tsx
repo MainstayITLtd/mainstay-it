@@ -71,22 +71,16 @@ export default function ClientLogin() {
       `}</style>
 
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div
-          className="absolute left-[-20%] top-[-20%] h-[850px] w-[850px] rounded-full bg-blue-500/15 blur-[190px]"
-          style={{ animation: "softMove 28s ease-in-out infinite" }}
-        />
-        <div
-          className="absolute right-[-18%] bottom-[-25%] h-[900px] w-[900px] rounded-full bg-emerald-400/14 blur-[210px]"
-          style={{ animation: "softMove 34s ease-in-out infinite reverse" }}
-        />
+        <div className="absolute left-[-20%] top-[-20%] h-[850px] w-[850px] rounded-full bg-blue-500/15 blur-[190px]" style={{ animation: "softMove 28s ease-in-out infinite" }} />
+        <div className="absolute right-[-18%] bottom-[-25%] h-[900px] w-[900px] rounded-full bg-emerald-400/14 blur-[210px]" style={{ animation: "softMove 34s ease-in-out infinite reverse" }} />
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-8">
         <header className="mb-14 flex items-center justify-between">
-          <a href="/">
+          <a href="/" className="flex items-center">
             <img
               src="/Logo%20290426.jpeg"
-              className="h-20 w-auto drop-shadow-[0_0_22px_rgba(255,255,255,0.25)] md:h-24"
+              className="h-16 w-auto object-contain mix-blend-screen brightness-125 contrast-125 drop-shadow-[0_0_18px_rgba(255,255,255,0.18)] md:h-20"
               alt="Mainstay IT"
             />
           </a>
@@ -115,10 +109,7 @@ export default function ClientLogin() {
 
             <div className="mt-8 rounded-3xl bg-black/35 p-5 text-left">
               {["Raise a support ticket", "Track existing requests", "Contact Mainstay IT support"].map((item) => (
-                <div
-                  key={item}
-                  className="mb-4 flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] p-4 last:mb-0"
-                >
+                <div key={item} className="mb-4 flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] p-4 last:mb-0">
                   <span className="text-zinc-300">{item}</span>
                   <span className="text-emerald-300">✓</span>
                 </div>
@@ -199,17 +190,13 @@ export default function ClientLogin() {
                   type="button"
                   onClick={() => setDropdownOpen(!dropdownOpen)}
                   className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left outline-none transition ${
-                    dropdownOpen
-                      ? "border-emerald-300 bg-emerald-400/10"
-                      : "border-white/10 bg-white/[0.06] hover:border-white/20"
+                    dropdownOpen ? "border-emerald-300 bg-emerald-400/10" : "border-white/10 bg-white/[0.06] hover:border-white/20"
                   }`}
                 >
                   <span className={urgency ? "text-white" : "text-zinc-500"}>
                     {urgency || "Select urgency"}
                   </span>
-                  <span className={`text-emerald-300 transition ${dropdownOpen ? "rotate-180" : ""}`}>
-                    ↓
-                  </span>
+                  <span className={`text-emerald-300 transition ${dropdownOpen ? "rotate-180" : ""}`}>↓</span>
                 </button>
 
                 {dropdownOpen && (
@@ -223,9 +210,7 @@ export default function ClientLogin() {
                           setDropdownOpen(false);
                         }}
                         className={`block w-full px-4 py-3 text-left text-sm transition ${
-                          urgency === option
-                            ? "bg-emerald-400 text-black"
-                            : "text-zinc-200 hover:bg-emerald-400/10 hover:text-emerald-300"
+                          urgency === option ? "bg-emerald-400 text-black" : "text-zinc-200 hover:bg-emerald-400/10 hover:text-emerald-300"
                         }`}
                       >
                         {option}

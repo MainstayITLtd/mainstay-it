@@ -18,37 +18,38 @@ export default function Home() {
       <style>{`
         @keyframes floatOne {
           0% { transform: translate3d(0, 0, 0) scale(1); }
-          50% { transform: translate3d(90px, 70px, 0) scale(1.08); }
+          50% { transform: translate3d(45px, 35px, 0) scale(1.04); }
           100% { transform: translate3d(0, 0, 0) scale(1); }
         }
         @keyframes floatTwo {
           0% { transform: translate3d(0, 0, 0) scale(1); }
-          50% { transform: translate3d(-80px, 60px, 0) scale(1.12); }
-          100% { transform: translate3d(0, 0, 0) scale(1); }
-        }
-        @keyframes floatThree {
-          0% { transform: translate3d(0, 0, 0) scale(1); }
-          50% { transform: translate3d(60px, -80px, 0) scale(1.06); }
+          50% { transform: translate3d(-40px, 30px, 0) scale(1.05); }
           100% { transform: translate3d(0, 0, 0) scale(1); }
         }
       `}</style>
 
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div className="absolute left-[-18%] top-[-18%] h-[850px] w-[850px] rounded-full bg-blue-500/18 blur-[180px]" style={{ animation: "floatOne 18s ease-in-out infinite" }} />
-        <div className="absolute right-[-18%] top-[12%] h-[780px] w-[780px] rounded-full bg-emerald-400/14 blur-[190px]" style={{ animation: "floatTwo 22s ease-in-out infinite" }} />
-        <div className="absolute bottom-[-28%] left-[25%] h-[850px] w-[850px] rounded-full bg-white/10 blur-[200px]" style={{ animation: "floatThree 26s ease-in-out infinite" }} />
+        <div className="absolute left-[-18%] top-[-18%] h-[850px] w-[850px] rounded-full bg-blue-500/18 blur-[180px]" style={{ animation: "floatOne 26s ease-in-out infinite" }} />
+        <div className="absolute right-[-18%] top-[12%] h-[780px] w-[780px] rounded-full bg-emerald-400/14 blur-[190px]" style={{ animation: "floatTwo 32s ease-in-out infinite" }} />
+        <div className="absolute bottom-[-28%] left-[25%] h-[850px] w-[850px] rounded-full bg-white/8 blur-[220px]" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-8">
         <header className="mb-24 flex items-center justify-between gap-6">
-          <img src="/Logo%20290426.jpeg" className="h-20 w-auto drop-shadow-[0_0_22px_rgba(255,255,255,0.25)] md:h-24" alt="Mainstay IT" />
+          <a href="/" className="flex items-center">
+            <img
+              src="/Logo%20290426.jpeg"
+              className="h-16 w-auto object-contain mix-blend-screen brightness-125 contrast-125 drop-shadow-[0_0_18px_rgba(255,255,255,0.18)] md:h-20"
+              alt="Mainstay IT"
+            />
+          </a>
 
           <div className="flex items-center gap-4">
-            <a href="/client-login" className="hidden text-sm text-zinc-400 hover:text-white md:block">
+            <a href="/client-login" className="hidden text-sm text-zinc-400 transition hover:text-white md:block">
               Client Portal
             </a>
 
-            <a href="tel:07531993944" className="rounded-full border border-white/15 bg-white/5 px-5 py-2 text-sm font-medium text-zinc-100 backdrop-blur hover:bg-white hover:text-black">
+            <a href="tel:07531993944" className="rounded-full border border-white/15 bg-white/5 px-5 py-2 text-sm font-medium text-zinc-100 backdrop-blur transition hover:bg-white hover:text-black">
               07531 993944
             </a>
           </div>
@@ -69,10 +70,10 @@ export default function Home() {
             </p>
 
             <div className="mt-9 flex flex-col gap-4 sm:flex-row">
-              <a href="#contact" className="rounded-full bg-white px-7 py-3 text-center font-semibold text-black shadow-xl hover:bg-zinc-200">
+              <a href="#contact" className="rounded-full bg-white px-7 py-3 text-center font-semibold text-black shadow-xl transition hover:-translate-y-0.5 hover:bg-zinc-200">
                 Get support
               </a>
-              <a href="#services" className="rounded-full border border-white/15 bg-white/5 px-7 py-3 text-center font-semibold text-white backdrop-blur hover:bg-white/10">
+              <a href="#services" className="rounded-full border border-white/15 bg-white/5 px-7 py-3 text-center font-semibold text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/10">
                 View services
               </a>
             </div>
