@@ -18,6 +18,7 @@ export default function ClientLogin() {
     e.preventDefault();
 
     if (!urgency) {
+      alert("Please select an urgency.");
       setStatus("error");
       return;
     }
@@ -49,9 +50,12 @@ export default function ClientLogin() {
         setUrgency("");
         form.reset();
       } else {
+        const errorData = await response.json();
+        alert(errorData.error || errorData.message || "Ticket failed");
         setStatus("error");
       }
-    } catch {
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Something went wrong");
       setStatus("error");
     }
   }
@@ -157,7 +161,7 @@ export default function ClientLogin() {
 
             {status === "error" && (
               <div className="mt-6 rounded-2xl border border-red-400/20 bg-red-400/10 p-4 text-sm font-medium text-red-300">
-                Something went wrong. Please check all required fields or email support@mainstayit.co.uk.
+                Something went wrong. Please check the popup error or email support@mainstayit.co.uk.
               </div>
             )}
 
@@ -165,47 +169,24 @@ export default function ClientLogin() {
               <div className="grid gap-5 md:grid-cols-2">
                 <div>
                   <label className="mb-2 block text-sm font-medium text-zinc-200">Your name *</label>
-                  <input
-                    type="text"
-                    name="name"
-                    required
-                    placeholder="Enter your name"
-                    className="w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none placeholder:text-zinc-500 focus:border-emerald-300"
-                  />
+                  <input type="text" name="name" required placeholder="Enter your name" className="w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none placeholder:text-zinc-500 focus:border-emerald-300" />
                 </div>
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-zinc-200">Company name *</label>
-                  <input
-                    type="text"
-                    name="company"
-                    required
-                    placeholder="Enter your company"
-                    className="w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none placeholder:text-zinc-500 focus:border-emerald-300"
-                  />
+                  <input type="text" name="company" required placeholder="Enter your company" className="w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none placeholder:text-zinc-500 focus:border-emerald-300" />
                 </div>
               </div>
 
               <div className="grid gap-5 md:grid-cols-2">
                 <div>
                   <label className="mb-2 block text-sm font-medium text-zinc-200">Email address *</label>
-                  <input
-                    type="email"
-                    name="email"
-                    required
-                    placeholder="Enter your email"
-                    className="w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none placeholder:text-zinc-500 focus:border-emerald-300"
-                  />
+                  <input type="email" name="email" required placeholder="Enter your email" className="w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none placeholder:text-zinc-500 focus:border-emerald-300" />
                 </div>
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-zinc-200">Phone number</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    placeholder="Enter your phone number"
-                    className="w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none placeholder:text-zinc-500 focus:border-emerald-300"
-                  />
+                  <input type="tel" name="phone" placeholder="Enter your phone number" className="w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none placeholder:text-zinc-500 focus:border-emerald-300" />
                 </div>
               </div>
 
@@ -256,23 +237,12 @@ export default function ClientLogin() {
 
               <div>
                 <label className="mb-2 block text-sm font-medium text-zinc-200">Issue / Summary *</label>
-                <input
-                  type="text"
-                  name="summary"
-                  required
-                  placeholder="Brief summary of the issue"
-                  className="w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none placeholder:text-zinc-500 focus:border-emerald-300"
-                />
+                <input type="text" name="summary" required placeholder="Brief summary of the issue" className="w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none placeholder:text-zinc-500 focus:border-emerald-300" />
               </div>
 
               <div>
                 <label className="mb-2 block text-sm font-medium text-zinc-200">Details *</label>
-                <textarea
-                  name="details"
-                  required
-                  placeholder="Please provide as much detail as possible..."
-                  className="h-28 w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none placeholder:text-zinc-500 focus:border-emerald-300"
-                />
+                <textarea name="details" required placeholder="Please provide as much detail as possible..." className="h-28 w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none placeholder:text-zinc-500 focus:border-emerald-300" />
               </div>
 
               <button
