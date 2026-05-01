@@ -1,9 +1,12 @@
 const ATERA_BASE_URL = "https://app.atera.com/api/v3";
-
 const PENTACO_CUSTOMER_ID = 2;
 
 function clean(value: unknown) {
   return String(value || "").trim();
+}
+
+function normalise(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
 function splitName(fullName: string) {
@@ -15,11 +18,15 @@ function splitName(fullName: string) {
   };
 }
 
-function normalise(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9]/g, "");
+function getPriority(urgency: string) {
+  const value = urgency.toLowerCase();
+
+  if (value.includes("critical") || value.includes("high")) return "High";
+  if (value.includes("medium")) return "Medium";
+  return "Low";
 }
 
-function getMatchedCustomer(company: string, email: string) {
+function matchCustomer(company: string, email: string) {
   const companyKey = normalise(company);
   const emailDomain = email.split("@")[1]?.toLowerCase() || "";
 
@@ -37,26 +44,18 @@ function getMatchedCustomer(company: string, email: string) {
   return null;
 }
 
-function getPriority(urgency: string) {
-  const value = urgency.toLowerCase();
-
-  if (value.includes("critical") || value.includes("high")) return "High";
-  if (value.includes("medium")) return "Medium";
-  return "Low";
-}
-
 async function ateraRequest(path: string, options: RequestInit = {}) {
   const apiKey = process.env.ATERA_API_KEY;
 
   if (!apiKey) {
-    throw new Error("Missing ATERA_API_KEY");
+    throw new Error("Missing ATERA_API_KEY in Vercel");
   }
 
   const response = await fetch(`${ATERA_BASE_URL}${path}`, {
     ...options,
     headers: {
-      "Content-Type": "application/json",
       "X-API-KEY": apiKey,
+      "Content-Type": "application/json",
       ...(options.headers || {}),
     },
   });
@@ -97,42 +96,27 @@ export async function POST(req: Request) {
       );
     }
 
-    const matchedCustomer = getMatchedCustomer(company, email);
+    const matchedCustomer = matchCustomer(company, email);
 
     if (!matchedCustomer) {
       return Response.json(
-        {
-          error: "Customer not recognised",
-          message: "This company is not mapped yet.",
-        },
+        { error: "Customer not recognised. This company is not mapped yet." },
         { status: 400 }
       );
     }
 
     const { firstName, lastName } = splitName(name);
 
-    const contactsResponse = await ateraRequest("/contacts");
-
-    const contacts = Array.isArray(contactsResponse)
-      ? contactsResponse
-      : contactsResponse?.items || contactsResponse?.Items || [];
-
-    let contact = contacts.find((item: any) => {
-      return String(item.Email || item.email || "").toLowerCase() === email.toLowerCase();
+    const contact = await ateraRequest("/contacts", {
+      method: "POST",
+      body: JSON.stringify({
+        CustomerID: matchedCustomer.customerId,
+        FirstName: firstName,
+        LastName: lastName,
+        Email: email,
+        Phone: phone || "",
+      }),
     });
-
-    if (!contact) {
-      contact = await ateraRequest("/contacts", {
-        method: "POST",
-        body: JSON.stringify({
-          CustomerID: matchedCustomer.customerId,
-          FirstName: firstName,
-          LastName: lastName,
-          Email: email,
-          Phone: phone || "",
-        }),
-      });
-    }
 
     const endUserId =
       contact?.EndUserID ||
@@ -141,7 +125,7 @@ export async function POST(req: Request) {
       contact?.id;
 
     if (!endUserId) {
-      throw new Error("Could not determine Atera contact ID");
+      throw new Error(`Contact created but no contact ID returned: ${JSON.stringify(contact)}`);
     }
 
     const ticketTitle = `[${urgency}] ${company} - ${summary}`;
@@ -168,7 +152,6 @@ ${details}
         TicketTitle: ticketTitle,
         TicketDescription: ticketDescription,
         EndUserID: endUserId,
-        EndUserEmail: email,
         CustomerID: matchedCustomer.customerId,
         TicketPriority: getPriority(urgency),
         TicketStatus: "Open",
@@ -180,8 +163,6 @@ ${details}
       ticket,
     });
   } catch (error) {
-    console.error(error);
-
     return Response.json(
       {
         error: error instanceof Error ? error.message : "Failed to create ticket",
