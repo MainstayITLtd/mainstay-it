@@ -44,6 +44,16 @@ function matchCustomer(company: string, email: string) {
   return null;
 }
 
+function getContactId(contact: any) {
+  return (
+    contact?.EndUserID ||
+    contact?.ContactID ||
+    contact?.CustomerContactID ||
+    contact?.ID ||
+    contact?.id
+  );
+}
+
 async function ateraRequest(path: string, options: RequestInit = {}) {
   const apiKey = process.env.ATERA_API_KEY;
 
@@ -77,6 +87,67 @@ async function ateraRequest(path: string, options: RequestInit = {}) {
   return data;
 }
 
+async function findContactByEmail(email: string) {
+  const contactsResponse = await ateraRequest("/contacts");
+
+  const contacts = Array.isArray(contactsResponse)
+    ? contactsResponse
+    : contactsResponse?.items ||
+      contactsResponse?.Items ||
+      contactsResponse?.value ||
+      contactsResponse?.Value ||
+      [];
+
+  return contacts.find((contact: any) => {
+    return String(contact.Email || contact.email || "").toLowerCase() === email.toLowerCase();
+  });
+}
+
+async function createOrFindContact({
+  name,
+  email,
+  phone,
+  customerId,
+}: {
+  name: string;
+  email: string;
+  phone: string;
+  customerId: number;
+}) {
+  const existingContact = await findContactByEmail(email);
+
+  if (existingContact) {
+    return existingContact;
+  }
+
+  const { firstName, lastName } = splitName(name);
+
+  try {
+    return await ateraRequest("/contacts", {
+      method: "POST",
+      body: JSON.stringify({
+        CustomerID: customerId,
+        FirstName: firstName,
+        LastName: lastName,
+        Email: email,
+        Phone: phone || "",
+      }),
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+
+    if (message.includes("409") || message.toLowerCase().includes("already exists")) {
+      const contactAfterConflict = await findContactByEmail(email);
+
+      if (contactAfterConflict) {
+        return contactAfterConflict;
+      }
+    }
+
+    throw error;
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -105,27 +176,17 @@ export async function POST(req: Request) {
       );
     }
 
-    const { firstName, lastName } = splitName(name);
-
-    const contact = await ateraRequest("/contacts", {
-      method: "POST",
-      body: JSON.stringify({
-        CustomerID: matchedCustomer.customerId,
-        FirstName: firstName,
-        LastName: lastName,
-        Email: email,
-        Phone: phone || "",
-      }),
+    const contact = await createOrFindContact({
+      name,
+      email,
+      phone,
+      customerId: matchedCustomer.customerId,
     });
 
-    const endUserId =
-      contact?.EndUserID ||
-      contact?.ContactID ||
-      contact?.ID ||
-      contact?.id;
+    const endUserId = getContactId(contact);
 
     if (!endUserId) {
-      throw new Error(`Contact created but no contact ID returned: ${JSON.stringify(contact)}`);
+      throw new Error(`Could not determine contact ID: ${JSON.stringify(contact)}`);
     }
 
     const ticketTitle = `[${urgency}] ${company} - ${summary}`;
