@@ -54,7 +54,7 @@ async function ateraRequest(path: string, options: RequestInit = {}) {
   const response = await fetch(`${ATERA_BASE_URL}${path}`, {
     ...options,
     headers: {
-      "X-API-KEY": apiKey,
+      Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
       ...(options.headers || {}),
     },
