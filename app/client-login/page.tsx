@@ -26,14 +26,21 @@ export default function ClientLogin() {
 
     const form = e.currentTarget;
     const data = new FormData(form);
-    data.set("urgency", urgency);
 
     try {
-      const response = await fetch("https://formspree.io/f/xgodewdl", {
+      const response = await fetch("/api/ticket", {
         method: "POST",
-        body: data,
+        body: JSON.stringify({
+          name: data.get("name"),
+          company: data.get("company"),
+          email: data.get("email"),
+          phone: data.get("phone"),
+          urgency,
+          summary: data.get("summary"),
+          details: data.get("details"),
+        }),
         headers: {
-          Accept: "application/json",
+          "Content-Type": "application/json",
         },
       });
 
