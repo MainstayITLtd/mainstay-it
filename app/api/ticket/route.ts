@@ -1,54 +1,192 @@
-import { Resend } from "resend";
+const ATERA_BASE_URL = "https://app.atera.com/api/v3";
+
+const PENTACO_CUSTOMER_ID = 2;
+
+function clean(value: unknown) {
+  return String(value || "").trim();
+}
+
+function splitName(fullName: string) {
+  const parts = fullName.trim().split(/\s+/);
+
+  return {
+    firstName: parts[0] || "Unknown",
+    lastName: parts.slice(1).join(" ") || "Contact",
+  };
+}
+
+function normalise(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function getMatchedCustomer(company: string, email: string) {
+  const companyKey = normalise(company);
+  const emailDomain = email.split("@")[1]?.toLowerCase() || "";
+
+  if (
+    companyKey.includes("pentaco") ||
+    companyKey.includes("pentacoconstruction") ||
+    emailDomain === "pentaco.co.uk"
+  ) {
+    return {
+      customerId: PENTACO_CUSTOMER_ID,
+      customerName: "Pentaco Construction Ltd",
+    };
+  }
+
+  return null;
+}
+
+function getPriority(urgency: string) {
+  const value = urgency.toLowerCase();
+
+  if (value.includes("critical") || value.includes("high")) return "High";
+  if (value.includes("medium")) return "Medium";
+  return "Low";
+}
+
+async function ateraRequest(path: string, options: RequestInit = {}) {
+  const apiKey = process.env.ATERA_API_KEY;
+
+  if (!apiKey) {
+    throw new Error("Missing ATERA_API_KEY");
+  }
+
+  const response = await fetch(`${ATERA_BASE_URL}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      "X-API-KEY": apiKey,
+      ...(options.headers || {}),
+    },
+  });
+
+  const text = await response.text();
+
+  let data: any = null;
+
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = text;
+  }
+
+  if (!response.ok) {
+    throw new Error(`Atera API error ${response.status}: ${JSON.stringify(data)}`);
+  }
+
+  return data;
+}
 
 export async function POST(req: Request) {
   try {
-    const apiKey = process.env.RESEND_API_KEY;
+    const body = await req.json();
 
-    if (!apiKey) {
+    const name = clean(body.name);
+    const company = clean(body.company);
+    const email = clean(body.email);
+    const phone = clean(body.phone);
+    const urgency = clean(body.urgency);
+    const summary = clean(body.summary);
+    const details = clean(body.details);
+
+    if (!name || !company || !email || !urgency || !summary || !details) {
       return Response.json(
-        { error: "Missing RESEND_API_KEY" },
-        { status: 500 }
+        { error: "Missing required fields" },
+        { status: 400 }
       );
     }
 
-    const resend = new Resend(apiKey);
+    const matchedCustomer = getMatchedCustomer(company, email);
 
-    const body = await req.json();
-    const { name, company, email, phone, urgency, summary, details } = body;
-
-    if (!name || !company || !email || !urgency || !summary || !details) {
-      return Response.json({ error: "Missing fields" }, { status: 400 });
+    if (!matchedCustomer) {
+      return Response.json(
+        {
+          error: "Customer not recognised",
+          message: "This company is not mapped yet.",
+        },
+        { status: 400 }
+      );
     }
 
-    const subject = `[${urgency}] ${company} - ${summary}`;
+    const { firstName, lastName } = splitName(name);
 
-    const html = `
-      <h2>New Support Ticket</h2>
-      <p><strong>Name:</strong> ${name}</p>
-      <p><strong>Company:</strong> ${company}</p>
-      <p><strong>Email:</strong> ${email}</p>
-      <p><strong>Phone:</strong> ${phone || "Not provided"}</p>
-      <p><strong>Urgency:</strong> ${urgency}</p>
-      <p><strong>Summary:</strong> ${summary}</p>
-      <hr/>
-      <p><strong>Details:</strong></p>
-      <p>${String(details).replace(/\n/g, "<br/>")}</p>
-    `;
+    const contactsResponse = await ateraRequest("/contacts");
 
-    const { error } = await resend.emails.send({
-      from: "Mainstay IT <support@mainstayit.co.uk>",
-      to: ["support@mainstayit.co.uk"],
-      replyTo: email,
-      subject,
-      html,
+    const contacts = Array.isArray(contactsResponse)
+      ? contactsResponse
+      : contactsResponse?.items || contactsResponse?.Items || [];
+
+    let contact = contacts.find((item: any) => {
+      return String(item.Email || item.email || "").toLowerCase() === email.toLowerCase();
     });
 
-    if (error) {
-      return Response.json({ error }, { status: 500 });
+    if (!contact) {
+      contact = await ateraRequest("/contacts", {
+        method: "POST",
+        body: JSON.stringify({
+          CustomerID: matchedCustomer.customerId,
+          FirstName: firstName,
+          LastName: lastName,
+          Email: email,
+          Phone: phone || "",
+        }),
+      });
     }
 
-    return Response.json({ success: true });
-  } catch {
-    return Response.json({ error: "Failed to send" }, { status: 500 });
+    const endUserId =
+      contact?.EndUserID ||
+      contact?.ContactID ||
+      contact?.ID ||
+      contact?.id;
+
+    if (!endUserId) {
+      throw new Error("Could not determine Atera contact ID");
+    }
+
+    const ticketTitle = `[${urgency}] ${company} - ${summary}`;
+
+    const ticketDescription = `
+New support request submitted from the Mainstay IT website.
+
+Name: ${name}
+Company: ${company}
+Email: ${email}
+Phone: ${phone || "Not provided"}
+Urgency: ${urgency}
+
+Summary:
+${summary}
+
+Details:
+${details}
+`.trim();
+
+    const ticket = await ateraRequest("/tickets", {
+      method: "POST",
+      body: JSON.stringify({
+        TicketTitle: ticketTitle,
+        TicketDescription: ticketDescription,
+        EndUserID: endUserId,
+        EndUserEmail: email,
+        CustomerID: matchedCustomer.customerId,
+        TicketPriority: getPriority(urgency),
+        TicketStatus: "Open",
+      }),
+    });
+
+    return Response.json({
+      success: true,
+      ticket,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return Response.json(
+      {
+        error: error instanceof Error ? error.message : "Failed to create ticket",
+      },
+      { status: 500 }
+    );
   }
 }
