@@ -4,13 +4,29 @@ import { useState } from "react";
 
 export default function ClientLogin() {
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [urgency, setUrgency] = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const urgencyOptions = [
+    "Low - general request",
+    "Medium - affecting work",
+    "High - urgent issue",
+    "Critical - business is down",
+  ];
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
+    if (!urgency) {
+      setStatus("error");
+      return;
+    }
+
     setStatus("sending");
 
     const form = e.currentTarget;
     const data = new FormData(form);
+    data.set("urgency", urgency);
 
     try {
       const response = await fetch("https://formspree.io/f/xgodewdl", {
@@ -23,6 +39,7 @@ export default function ClientLogin() {
 
       if (response.ok) {
         setStatus("success");
+        setUrgency("");
         form.reset();
       } else {
         setStatus("error");
@@ -86,11 +103,7 @@ export default function ClientLogin() {
             </p>
 
             <div className="mt-8 rounded-3xl bg-black/35 p-5 text-left">
-              {[
-                "Raise a support ticket",
-                "Track existing requests",
-                "Contact Mainstay IT support",
-              ].map((item) => (
+              {["Raise a support ticket", "Track existing requests", "Contact Mainstay IT support"].map((item) => (
                 <div
                   key={item}
                   className="mb-4 flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] p-4 last:mb-0"
@@ -137,16 +150,14 @@ export default function ClientLogin() {
 
             {status === "error" && (
               <div className="mt-6 rounded-2xl border border-red-400/20 bg-red-400/10 p-4 text-sm font-medium text-red-300">
-                Something went wrong. Please try again or email support@mainstayit.co.uk.
+                Something went wrong. Please check all required fields or email support@mainstayit.co.uk.
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="mt-8 space-y-5">
               <div className="grid gap-5 md:grid-cols-2">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-200">
-                    Your name *
-                  </label>
+                  <label className="mb-2 block text-sm font-medium text-zinc-200">Your name *</label>
                   <input
                     type="text"
                     name="name"
@@ -157,9 +168,7 @@ export default function ClientLogin() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-200">
-                    Company name *
-                  </label>
+                  <label className="mb-2 block text-sm font-medium text-zinc-200">Company name *</label>
                   <input
                     type="text"
                     name="company"
@@ -172,9 +181,7 @@ export default function ClientLogin() {
 
               <div className="grid gap-5 md:grid-cols-2">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-200">
-                    Email address *
-                  </label>
+                  <label className="mb-2 block text-sm font-medium text-zinc-200">Email address *</label>
                   <input
                     type="email"
                     name="email"
@@ -185,9 +192,7 @@ export default function ClientLogin() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-200">
-                    Phone number
-                  </label>
+                  <label className="mb-2 block text-sm font-medium text-zinc-200">Phone number</label>
                   <input
                     type="tel"
                     name="phone"
@@ -197,30 +202,53 @@ export default function ClientLogin() {
                 </div>
               </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-zinc-200">
-                  Urgency *
-                </label>
-                <select
-                  name="urgency"
-                  required
-                  defaultValue=""
-                  className="w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3 text-white outline-none focus:border-emerald-300"
+              <div className="relative">
+                <label className="mb-2 block text-sm font-medium text-zinc-200">Urgency *</label>
+
+                <input type="hidden" name="urgency" value={urgency} />
+
+                <button
+                  type="button"
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left outline-none transition ${
+                    dropdownOpen
+                      ? "border-emerald-300 bg-emerald-400/10"
+                      : "border-white/10 bg-white/[0.06] hover:border-white/20"
+                  }`}
                 >
-                  <option value="" disabled>
-                    Select urgency
-                  </option>
-                  <option value="Low">Low - general request</option>
-                  <option value="Medium">Medium - affecting work</option>
-                  <option value="High">High - urgent issue</option>
-                  <option value="Critical">Critical - business is down</option>
-                </select>
+                  <span className={urgency ? "text-white" : "text-zinc-500"}>
+                    {urgency || "Select urgency"}
+                  </span>
+                  <span className={`text-emerald-300 transition ${dropdownOpen ? "rotate-180" : ""}`}>
+                    ↓
+                  </span>
+                </button>
+
+                {dropdownOpen && (
+                  <div className="absolute z-30 mt-2 w-full overflow-hidden rounded-xl border border-white/10 bg-[#07110d] shadow-2xl backdrop-blur-xl">
+                    {urgencyOptions.map((option) => (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() => {
+                          setUrgency(option);
+                          setDropdownOpen(false);
+                        }}
+                        className={`block w-full px-4 py-3 text-left text-sm transition ${
+                          urgency === option
+                            ? "bg-emerald-400 text-black"
+                            : "text-zinc-200 hover:bg-emerald-400/10 hover:text-emerald-300"
+                        }`}
+                      >
+                        {option}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-zinc-200">
-                  Issue / Summary *
-                </label>
+                <label className="mb-2 block text-sm font-medium text-zinc-200">Issue / Summary *</label>
                 <input
                   type="text"
                   name="summary"
@@ -231,9 +259,7 @@ export default function ClientLogin() {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-zinc-200">
-                  Details *
-                </label>
+                <label className="mb-2 block text-sm font-medium text-zinc-200">Details *</label>
                 <textarea
                   name="details"
                   required
