@@ -33,9 +33,7 @@ function getTicketId(ticket: any) {
 async function ateraRequest(path: string, options: RequestInit = {}) {
   const apiKey = process.env.ATERA_API_KEY;
 
-  if (!apiKey) {
-    throw new Error("Missing ATERA_API_KEY");
-  }
+  if (!apiKey) throw new Error("Missing ATERA_API_KEY");
 
   const res = await fetch(`${ATERA_BASE_URL}${path}`, {
     ...options,
@@ -64,22 +62,17 @@ async function ateraRequest(path: string, options: RequestInit = {}) {
 
 async function findContactByEmail(email: string) {
   const res = await ateraRequest("/contacts");
-
   const contacts = Array.isArray(res) ? res : res?.items || res?.Items || [];
 
   return contacts.find(
     (contact: any) =>
-      String(contact.Email || contact.email || "").toLowerCase() ===
-      email.toLowerCase()
+      String(contact.Email || contact.email || "").toLowerCase() === email.toLowerCase()
   );
 }
 
 async function createOrFindContact(name: string, email: string, phone: string) {
   const existing = await findContactByEmail(email);
-
-  if (existing) {
-    return existing;
-  }
+  if (existing) return existing;
 
   const { firstName, lastName } = splitName(name);
 
@@ -106,37 +99,14 @@ async function createOrFindContact(name: string, email: string, phone: string) {
   }
 }
 
-async function addTicketComment(ticketId: string | number, comment: string) {
-  const possiblePaths = [
-    `/tickets/${ticketId}/comments`,
-    `/tickets/${ticketId}/comment`,
-    `/ticket/${ticketId}/comments`,
-  ];
-
-  const possibleBodies = [
-    { Comment: comment, IsInternal: false },
-    { CommentText: comment, IsInternal: false },
-    { Text: comment, IsInternal: false },
-    { Body: comment, IsInternal: false },
-    { comment, is_internal: false },
-  ];
-
-  for (const path of possiblePaths) {
-    for (const body of possibleBodies) {
-      try {
-        await ateraRequest(path, {
-          method: "POST",
-          body: JSON.stringify(body),
-        });
-
-        return true;
-      } catch {
-        // Try next possible Atera comment format
-      }
-    }
-  }
-
-  return false;
+async function addTicketUpdate(ticketId: string | number, message: string) {
+  await ateraRequest(`/tickets/${ticketId}/comments`, {
+    method: "POST",
+    body: JSON.stringify({
+      comment: message,
+      is_internal: false,
+    }),
+  });
 }
 
 export async function POST(req: Request) {
@@ -177,7 +147,7 @@ export async function POST(req: Request) {
 
     const ticketTitle = `[${urgency}] ${company} - ${summary}`;
 
-    const description = `
+    const ticketDescription = `
 New support request submitted from the Mainstay IT website.
 
 Name: ${name}
@@ -191,15 +161,13 @@ ${summary}
 
 Details:
 ${details}
-
-${attachmentUrl ? `Attachment uploaded:\n${attachmentUrl}` : "Attachment: None"}
 `.trim();
 
     const ticket = await ateraRequest("/tickets", {
       method: "POST",
       body: JSON.stringify({
         TicketTitle: ticketTitle,
-        TicketDescription: description,
+        TicketDescription: ticketDescription,
         EndUserID: endUserId,
         CustomerID: PENTACO_CUSTOMER_ID,
         TicketPriority: getPriority(urgency),
@@ -210,7 +178,7 @@ ${attachmentUrl ? `Attachment uploaded:\n${attachmentUrl}` : "Attachment: None"}
     const ticketId = getTicketId(ticket);
 
     if (ticketId && attachmentUrl) {
-      await addTicketComment(
+      await addTicketUpdate(
         ticketId,
         `Attachment uploaded from the Mainstay IT website:\n\n${attachmentUrl}`
       );
