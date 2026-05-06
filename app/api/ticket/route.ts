@@ -1,7 +1,9 @@
+import { put } from "@vercel/blob";
+
 const ATERA_BASE_URL = "https://app.atera.com/api/v3";
 const PENTACO_CUSTOMER_ID = 2;
 
-function clean(value: unknown) {
+function clean(value: FormDataEntryValue | null) {
   return String(value || "").trim();
 }
 
@@ -11,7 +13,6 @@ function normalise(value: string) {
 
 function splitName(fullName: string) {
   const parts = fullName.trim().split(/\s+/);
-
   return {
     firstName: parts[0] || "Unknown",
     lastName: parts.slice(1).join(" ") || "Contact",
@@ -20,7 +21,6 @@ function splitName(fullName: string) {
 
 function getPriority(urgency: string) {
   const value = urgency.toLowerCase();
-
   if (value.includes("critical") || value.includes("high")) return "High";
   if (value.includes("medium")) return "Medium";
   return "Low";
@@ -73,7 +73,6 @@ async function ateraRequest(path: string, options: RequestInit = {}) {
   const text = await response.text();
 
   let data: any = null;
-
   try {
     data = text ? JSON.parse(text) : null;
   } catch {
@@ -150,21 +149,19 @@ async function createOrFindContact({
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const formData = await req.formData();
 
-    const name = clean(body.name);
-    const company = clean(body.company);
-    const email = clean(body.email);
-    const phone = clean(body.phone);
-    const urgency = clean(body.urgency);
-    const summary = clean(body.summary);
-    const details = clean(body.details);
+    const name = clean(formData.get("name"));
+    const company = clean(formData.get("company"));
+    const email = clean(formData.get("email"));
+    const phone = clean(formData.get("phone"));
+    const urgency = clean(formData.get("urgency"));
+    const summary = clean(formData.get("summary"));
+    const details = clean(formData.get("details"));
+    const file = formData.get("file") as File | null;
 
     if (!name || !company || !email || !urgency || !summary || !details) {
-      return Response.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
+      return Response.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     const matchedCustomer = matchCustomer(company, email);
@@ -174,6 +171,18 @@ export async function POST(req: Request) {
         { error: "Customer not recognised. This company is not mapped yet." },
         { status: 400 }
       );
+    }
+
+    let attachmentUrl = "";
+
+    if (file && file.size > 0) {
+      const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "-");
+
+      const blob = await put(`tickets/${Date.now()}-${safeName}`, file, {
+        access: "public",
+      });
+
+      attachmentUrl = blob.url;
     }
 
     const contact = await createOrFindContact({
@@ -205,6 +214,8 @@ ${summary}
 
 Details:
 ${details}
+
+${attachmentUrl ? `Attachment:\n${attachmentUrl}` : "Attachment: None"}
 `.trim();
 
     const ticket = await ateraRequest("/tickets", {
@@ -222,6 +233,7 @@ ${details}
     return Response.json({
       success: true,
       ticket,
+      attachmentUrl,
     });
   } catch (error) {
     return Response.json(
