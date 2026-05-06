@@ -13,7 +13,6 @@ function normalise(value: string) {
 
 function splitName(fullName: string) {
   const parts = fullName.trim().split(/\s+/);
-
   return {
     firstName: parts[0] || "Unknown",
     lastName: parts.slice(1).join(" ") || "Contact",
@@ -22,10 +21,8 @@ function splitName(fullName: string) {
 
 function getPriority(urgency: string) {
   const value = urgency.toLowerCase();
-
   if (value.includes("critical") || value.includes("high")) return "High";
   if (value.includes("medium")) return "Medium";
-
   return "Low";
 }
 
@@ -57,17 +54,6 @@ function getContactId(contact: any) {
   );
 }
 
-function getTicketId(ticket: any) {
-  return (
-    ticket?.TicketID ||
-    ticket?.TicketId ||
-    ticket?.ticketID ||
-    ticket?.ticketId ||
-    ticket?.ID ||
-    ticket?.id
-  );
-}
-
 async function ateraRequest(path: string, options: RequestInit = {}) {
   const apiKey = process.env.ATERA_API_KEY;
 
@@ -87,7 +73,6 @@ async function ateraRequest(path: string, options: RequestInit = {}) {
   const text = await response.text();
 
   let data: any = null;
-
   try {
     data = text ? JSON.parse(text) : null;
   } catch {
@@ -152,30 +137,10 @@ async function createOrFindContact({
 
     if (message.includes("409") || message.toLowerCase().includes("already exists")) {
       const contactAfterConflict = await findContactByEmail(email);
-
-      if (contactAfterConflict) {
-        return contactAfterConflict;
-      }
+      if (contactAfterConflict) return contactAfterConflict;
     }
 
     throw error;
-  }
-}
-
-async function addTicketComment(ticketId: string | number, commentText: string) {
-  try {
-    await ateraRequest(`/tickets/${ticketId}/comments`, {
-      method: "POST",
-      body: JSON.stringify({
-        Comment: commentText,
-        CommentText: commentText,
-        Text: commentText,
-        Body: commentText,
-        IsInternal: false,
-      }),
-    });
-  } catch {
-    // If Atera rejects the comment endpoint, do not fail the ticket creation.
   }
 }
 
@@ -232,7 +197,7 @@ export async function POST(req: Request) {
 
     const ticketTitle = `[${urgency}] ${company} - ${summary}`;
 
-    const ticketDescription = `
+    const description = `
 New support request submitted from the Mainstay IT website.
 
 Name: ${name}
@@ -254,23 +219,14 @@ ${attachmentUrl}` : "Attachment: None"}
     const ticket = await ateraRequest("/tickets", {
       method: "POST",
       body: JSON.stringify({
-        TicketTitle: ticketTitle,
-        TicketDescription: ticketDescription,
-        EndUserID: endUserId,
-        CustomerID: matchedCustomer.customerId,
-        TicketPriority: getPriority(urgency),
-        TicketStatus: "Open",
+        ticket_title: ticketTitle,
+        description,
+        ticket_priority: getPriority(urgency),
+        ticket_status: "Open",
+        end_user_id: endUserId,
+        end_user_email: email,
       }),
     });
-
-    const ticketId = getTicketId(ticket);
-
-    if (ticketId && attachmentUrl) {
-      await addTicketComment(
-        ticketId,
-        `Attachment uploaded from the Mainstay IT website:\n\n${attachmentUrl}`
-      );
-    }
 
     return Response.json({
       success: true,
