@@ -28,7 +28,10 @@ function getContactId(contact: any) {
 
 async function ateraRequest(path: string, options: RequestInit = {}) {
   const apiKey = process.env.ATERA_API_KEY;
-  if (!apiKey) throw new Error("Missing ATERA_API_KEY");
+
+  if (!apiKey) {
+    throw new Error("Missing ATERA_API_KEY");
+  }
 
   const res = await fetch(`${ATERA_BASE_URL}${path}`, {
     ...options,
@@ -57,15 +60,23 @@ async function ateraRequest(path: string, options: RequestInit = {}) {
 
 async function findContactByEmail(email: string) {
   const res = await ateraRequest("/contacts");
-  const contacts = Array.isArray(res) ? res : res?.items || res?.Items || [];
+
+  const contacts = Array.isArray(res)
+    ? res
+    : res?.items || res?.Items || [];
 
   return contacts.find(
     (contact: any) =>
-      String(contact.Email || contact.email || "").toLowerCase() === email.toLowerCase()
+      String(contact.Email || contact.email || "").toLowerCase() ===
+      email.toLowerCase()
   );
 }
 
-async function createOrFindContact(name: string, email: string, phone: string) {
+async function createOrFindContact(
+  name: string,
+  email: string,
+  phone: string
+) {
   const existing = await findContactByEmail(email);
   if (existing) return existing;
 
@@ -82,14 +93,11 @@ async function createOrFindContact(name: string, email: string, phone: string) {
         Phone: phone || "",
       }),
     });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "";
-
-    if (message.includes("409") || message.toLowerCase().includes("already exists")) {
+  } catch (error: any) {
+    if (error.message.includes("409")) {
       const retry = await findContactByEmail(email);
       if (retry) return retry;
     }
-
     throw error;
   }
 }
@@ -107,64 +115,65 @@ export async function POST(req: Request) {
     const details = clean(formData.get("details"));
     const file = formData.get("file") as File | null;
 
-    if (!name || !company || !email || !urgency || !summary || !details) {
-      return Response.json({ error: "Missing required fields" }, { status: 400 });
+    if (!name || !company || !email || !summary || !details) {
+      return Response.json({ error: "Missing fields" }, { status: 400 });
     }
 
+    // ✅ Upload file
     let attachmentUrl = "";
 
     if (file && file.size > 0) {
       const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "-");
 
-      const blob = await put(`tickets/${Date.now()}-${safeName}`, file, {
-        access: "public",
-      });
+      const blob = await put(
+        `tickets/${Date.now()}-${safeName}`,
+        file,
+        { access: "public" }
+      );
 
       attachmentUrl = blob.url;
     }
 
+    // ✅ Contact
     const contact = await createOrFindContact(name, email, phone);
-    const contactId = getContactId(contact);
+    const endUserId = getContactId(contact);
 
-    if (!contactId) {
-      throw new Error(`Could not determine contact ID: ${JSON.stringify(contact)}`);
+    if (!endUserId) {
+      throw new Error("No contact ID returned");
     }
 
-    const ticketTitle = `[${urgency}] ${company} - ${summary}`;
+    // ✅ Title WITH attachment (this is the reliable method)
+    const ticketTitle = attachmentUrl
+      ? `[${urgency}] ${company} - ${summary} | ${attachmentUrl}`
+      : `[${urgency}] ${company} - ${summary}`;
 
+    // ✅ Description (clean)
     const description = `
-New support request submitted from the Mainstay IT website.
+New support request submitted from website
 
 Name: ${name}
 Company: ${company}
 Email: ${email}
-Phone: ${phone || "Not provided"}
+Phone: ${phone || "N/A"}
 Urgency: ${urgency}
 
-Issue / Summary:
+Summary:
 ${summary}
 
 Details:
 ${details}
-
-Attachment:
-${attachmentUrl || "No attachment uploaded"}
 `.trim();
 
+    // ✅ Create ticket
     const ticket = await ateraRequest("/tickets", {
       method: "POST",
       body: JSON.stringify({
-        ticket_title: ticketTitle,
-        description,
-        ticket_priority: getPriority(urgency),
-        ticket_status: "Open",
-
-        end_user_id: contactId,
-        end_user_email: email,
-
-        contact_id: contactId,
-        contact_email: email,
-        contact_phone: phone || "",
+        TicketTitle: ticketTitle,
+        TicketDescription: description,
+        EndUserID: endUserId,
+        CustomerID: PENTACO_CUSTOMER_ID,
+        TicketPriority: getPriority(urgency),
+        TicketStatus: "Open",
       }),
     });
 
@@ -173,10 +182,14 @@ ${attachmentUrl || "No attachment uploaded"}
       ticket,
       attachmentUrl,
     });
+
   } catch (error) {
     return Response.json(
       {
-        error: error instanceof Error ? error.message : "Failed to create ticket",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to create ticket",
       },
       { status: 500 }
     );
