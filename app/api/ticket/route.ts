@@ -7,10 +7,6 @@ function clean(value: FormDataEntryValue | null) {
   return String(value || "").trim();
 }
 
-function normalise(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9]/g, "");
-}
-
 function splitName(fullName: string) {
   const parts = fullName.trim().split(/\s+/);
   return {
@@ -26,42 +22,14 @@ function getPriority(urgency: string) {
   return "Low";
 }
 
-function matchCustomer(company: string, email: string) {
-  const companyKey = normalise(company);
-  const emailDomain = email.split("@")[1]?.toLowerCase() || "";
-
-  if (
-    companyKey.includes("pentaco") ||
-    companyKey.includes("pentacoconstruction") ||
-    emailDomain === "pentaco.co.uk"
-  ) {
-    return {
-      customerId: PENTACO_CUSTOMER_ID,
-      customerName: "Pentaco Construction Ltd",
-    };
-  }
-
-  return null;
-}
-
-function getContactId(contact: any) {
-  return (
-    contact?.EndUserID ||
-    contact?.ContactID ||
-    contact?.CustomerContactID ||
-    contact?.ID ||
-    contact?.id
-  );
-}
-
 async function ateraRequest(path: string, options: RequestInit = {}) {
   const apiKey = process.env.ATERA_API_KEY;
 
   if (!apiKey) {
-    throw new Error("Missing ATERA_API_KEY in Vercel");
+    throw new Error("Missing ATERA_API_KEY");
   }
 
-  const response = await fetch(`${ATERA_BASE_URL}${path}`, {
+  const res = await fetch(`${ATERA_BASE_URL}${path}`, {
     ...options,
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -70,54 +38,41 @@ async function ateraRequest(path: string, options: RequestInit = {}) {
     },
   });
 
-  const text = await response.text();
+  const text = await res.text();
 
-  let data: any = null;
+  let data: any;
   try {
     data = text ? JSON.parse(text) : null;
   } catch {
     data = text;
   }
 
-  if (!response.ok) {
-    throw new Error(`Atera API error ${response.status}: ${JSON.stringify(data)}`);
+  if (!res.ok) {
+    throw new Error(`Atera API error ${res.status}: ${JSON.stringify(data)}`);
   }
 
   return data;
 }
 
 async function findContactByEmail(email: string) {
-  const contactsResponse = await ateraRequest("/contacts");
+  const res = await ateraRequest("/contacts");
 
-  const contacts = Array.isArray(contactsResponse)
-    ? contactsResponse
-    : contactsResponse?.items ||
-      contactsResponse?.Items ||
-      contactsResponse?.value ||
-      contactsResponse?.Value ||
-      [];
+  const contacts = Array.isArray(res)
+    ? res
+    : res?.items || res?.Items || [];
 
-  return contacts.find((contact: any) => {
-    return String(contact.Email || contact.email || "").toLowerCase() === email.toLowerCase();
-  });
+  return contacts.find((c: any) =>
+    (c.Email || "").toLowerCase() === email.toLowerCase()
+  );
 }
 
-async function createOrFindContact({
-  name,
-  email,
-  phone,
-  customerId,
-}: {
-  name: string;
-  email: string;
-  phone: string;
-  customerId: number;
-}) {
-  const existingContact = await findContactByEmail(email);
-
-  if (existingContact) {
-    return existingContact;
-  }
+async function createOrFindContact(
+  name: string,
+  email: string,
+  phone: string
+) {
+  const existing = await findContactByEmail(email);
+  if (existing) return existing;
 
   const { firstName, lastName } = splitName(name);
 
@@ -125,23 +80,29 @@ async function createOrFindContact({
     return await ateraRequest("/contacts", {
       method: "POST",
       body: JSON.stringify({
-        CustomerID: customerId,
+        CustomerID: PENTACO_CUSTOMER_ID,
         FirstName: firstName,
         LastName: lastName,
         Email: email,
         Phone: phone || "",
       }),
     });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "";
-
-    if (message.includes("409") || message.toLowerCase().includes("already exists")) {
-      const contactAfterConflict = await findContactByEmail(email);
-      if (contactAfterConflict) return contactAfterConflict;
+  } catch (err: any) {
+    if (err.message.includes("409")) {
+      const retry = await findContactByEmail(email);
+      if (retry) return retry;
     }
-
-    throw error;
+    throw err;
   }
+}
+
+function getContactId(contact: any) {
+  return (
+    contact?.EndUserID ||
+    contact?.ContactID ||
+    contact?.ID ||
+    contact?.id
+  );
 }
 
 export async function POST(req: Request) {
@@ -157,74 +118,65 @@ export async function POST(req: Request) {
     const details = clean(formData.get("details"));
     const file = formData.get("file") as File | null;
 
-    if (!name || !company || !email || !urgency || !summary || !details) {
-      return Response.json({ error: "Missing required fields" }, { status: 400 });
+    if (!name || !company || !email || !summary || !details) {
+      return Response.json({ error: "Missing fields" }, { status: 400 });
     }
 
-    const matchedCustomer = matchCustomer(company, email);
-
-    if (!matchedCustomer) {
-      return Response.json(
-        { error: "Customer not recognised. This company is not mapped yet." },
-        { status: 400 }
-      );
-    }
-
+    // ✅ Upload file
     let attachmentUrl = "";
 
     if (file && file.size > 0) {
-      const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "-");
-
-      const blob = await put(`tickets/${Date.now()}-${safeName}`, file, {
-        access: "public",
-      });
+      const blob = await put(
+        `tickets/${Date.now()}-${file.name}`,
+        file,
+        { access: "public" }
+      );
 
       attachmentUrl = blob.url;
     }
 
-    const contact = await createOrFindContact({
-      name,
-      email,
-      phone,
-      customerId: matchedCustomer.customerId,
-    });
-
+    // ✅ Create/find contact
+    const contact = await createOrFindContact(name, email, phone);
     const endUserId = getContactId(contact);
 
     if (!endUserId) {
-      throw new Error(`Could not determine contact ID: ${JSON.stringify(contact)}`);
+      throw new Error("No contact ID returned");
     }
 
-    const ticketTitle = `[${urgency}] ${company} - ${summary}`;
+    // ✅ FORCE attachment into title so it's always visible
+    const ticketTitle = attachmentUrl
+      ? `[${urgency}] ${company} - ${summary} | ${attachmentUrl}`
+      : `[${urgency}] ${company} - ${summary}`;
 
+    // ✅ Description
     const description = `
-New support request submitted from the Mainstay IT website.
+New support request submitted from website
 
 Name: ${name}
 Company: ${company}
 Email: ${email}
-Phone: ${phone || "Not provided"}
+Phone: ${phone || "N/A"}
 Urgency: ${urgency}
 
-Issue / Summary:
+Summary:
 ${summary}
 
 Details:
 ${details}
 
-${attachmentUrl ? `ATTACHMENT UPLOADED:
-${attachmentUrl}` : "Attachment: None"}
+${attachmentUrl ? `Attachment:\n${attachmentUrl}` : ""}
 `.trim();
 
+    // ✅ Create ticket
     const ticket = await ateraRequest("/tickets", {
       method: "POST",
       body: JSON.stringify({
-        ticket_title: ticketTitle,
-        description,
-        ticket_priority: getPriority(urgency),
-        ticket_status: "Open",
-        end_user_id: endUserId,
-        end_user_email: email,
+        TicketTitle: ticketTitle,
+        TicketDescription: description,
+        EndUserID: endUserId,
+        CustomerID: PENTACO_CUSTOMER_ID,
+        TicketPriority: getPriority(urgency),
+        TicketStatus: "Open",
       }),
     });
 
@@ -233,11 +185,10 @@ ${attachmentUrl}` : "Attachment: None"}
       ticket,
       attachmentUrl,
     });
+
   } catch (error) {
     return Response.json(
-      {
-        error: error instanceof Error ? error.message : "Failed to create ticket",
-      },
+      { error: error instanceof Error ? error.message : "Error" },
       { status: 500 }
     );
   }
