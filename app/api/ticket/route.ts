@@ -13,6 +13,7 @@ function normalise(value: string) {
 
 function splitName(fullName: string) {
   const parts = fullName.trim().split(/\s+/);
+
   return {
     firstName: parts[0] || "Unknown",
     lastName: parts.slice(1).join(" ") || "Contact",
@@ -21,8 +22,10 @@ function splitName(fullName: string) {
 
 function getPriority(urgency: string) {
   const value = urgency.toLowerCase();
+
   if (value.includes("critical") || value.includes("high")) return "High";
   if (value.includes("medium")) return "Medium";
+
   return "Low";
 }
 
@@ -54,6 +57,17 @@ function getContactId(contact: any) {
   );
 }
 
+function getTicketId(ticket: any) {
+  return (
+    ticket?.TicketID ||
+    ticket?.TicketId ||
+    ticket?.ticketID ||
+    ticket?.ticketId ||
+    ticket?.ID ||
+    ticket?.id
+  );
+}
+
 async function ateraRequest(path: string, options: RequestInit = {}) {
   const apiKey = process.env.ATERA_API_KEY;
 
@@ -73,6 +87,7 @@ async function ateraRequest(path: string, options: RequestInit = {}) {
   const text = await response.text();
 
   let data: any = null;
+
   try {
     data = text ? JSON.parse(text) : null;
   } catch {
@@ -147,6 +162,23 @@ async function createOrFindContact({
   }
 }
 
+async function addTicketComment(ticketId: string | number, commentText: string) {
+  try {
+    await ateraRequest(`/tickets/${ticketId}/comments`, {
+      method: "POST",
+      body: JSON.stringify({
+        Comment: commentText,
+        CommentText: commentText,
+        Text: commentText,
+        Body: commentText,
+        IsInternal: false,
+      }),
+    });
+  } catch {
+    // If Atera rejects the comment endpoint, do not fail the ticket creation.
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
@@ -209,13 +241,14 @@ Email: ${email}
 Phone: ${phone || "Not provided"}
 Urgency: ${urgency}
 
-Summary:
+Issue / Summary:
 ${summary}
 
 Details:
 ${details}
 
-${attachmentUrl ? `Attachment:\n${attachmentUrl}` : "Attachment: None"}
+${attachmentUrl ? `ATTACHMENT UPLOADED:
+${attachmentUrl}` : "Attachment: None"}
 `.trim();
 
     const ticket = await ateraRequest("/tickets", {
@@ -229,6 +262,15 @@ ${attachmentUrl ? `Attachment:\n${attachmentUrl}` : "Attachment: None"}
         TicketStatus: "Open",
       }),
     });
+
+    const ticketId = getTicketId(ticket);
+
+    if (ticketId && attachmentUrl) {
+      await addTicketComment(
+        ticketId,
+        `Attachment uploaded from the Mainstay IT website:\n\n${attachmentUrl}`
+      );
+    }
 
     return Response.json({
       success: true,
