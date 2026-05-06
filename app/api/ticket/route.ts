@@ -26,13 +26,8 @@ function getContactId(contact: any) {
   return contact?.EndUserID || contact?.ContactID || contact?.ID || contact?.id;
 }
 
-function getTicketId(ticket: any) {
-  return ticket?.TicketID || ticket?.TicketId || ticket?.ID || ticket?.id;
-}
-
 async function ateraRequest(path: string, options: RequestInit = {}) {
   const apiKey = process.env.ATERA_API_KEY;
-
   if (!apiKey) throw new Error("Missing ATERA_API_KEY");
 
   const res = await fetch(`${ATERA_BASE_URL}${path}`, {
@@ -99,16 +94,6 @@ async function createOrFindContact(name: string, email: string, phone: string) {
   }
 }
 
-async function addTicketUpdate(ticketId: string | number, message: string) {
-  await ateraRequest(`/tickets/${ticketId}/comments`, {
-    method: "POST",
-    body: JSON.stringify({
-      comment: message,
-      is_internal: false,
-    }),
-  });
-}
-
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
@@ -139,15 +124,15 @@ export async function POST(req: Request) {
     }
 
     const contact = await createOrFindContact(name, email, phone);
-    const endUserId = getContactId(contact);
+    const contactId = getContactId(contact);
 
-    if (!endUserId) {
+    if (!contactId) {
       throw new Error(`Could not determine contact ID: ${JSON.stringify(contact)}`);
     }
 
     const ticketTitle = `[${urgency}] ${company} - ${summary}`;
 
-    const ticketDescription = `
+    const description = `
 New support request submitted from the Mainstay IT website.
 
 Name: ${name}
@@ -161,33 +146,31 @@ ${summary}
 
 Details:
 ${details}
+
+Attachment:
+${attachmentUrl || "No attachment uploaded"}
 `.trim();
 
     const ticket = await ateraRequest("/tickets", {
       method: "POST",
       body: JSON.stringify({
-        TicketTitle: ticketTitle,
-        TicketDescription: ticketDescription,
-        EndUserID: endUserId,
-        CustomerID: PENTACO_CUSTOMER_ID,
-        TicketPriority: getPriority(urgency),
-        TicketStatus: "Open",
+        ticket_title: ticketTitle,
+        description,
+        ticket_priority: getPriority(urgency),
+        ticket_status: "Open",
+
+        end_user_id: contactId,
+        end_user_email: email,
+
+        contact_id: contactId,
+        contact_email: email,
+        contact_phone: phone || "",
       }),
     });
-
-    const ticketId = getTicketId(ticket);
-
-    if (ticketId && attachmentUrl) {
-      await addTicketUpdate(
-        ticketId,
-        `Attachment uploaded from the Mainstay IT website:\n\n${attachmentUrl}`
-      );
-    }
 
     return Response.json({
       success: true,
       ticket,
-      ticketId,
       attachmentUrl,
     });
   } catch (error) {
