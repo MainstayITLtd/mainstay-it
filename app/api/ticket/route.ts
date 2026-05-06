@@ -22,6 +22,14 @@ function getPriority(urgency: string) {
   return "Low";
 }
 
+function getContactId(contact: any) {
+  return contact?.EndUserID || contact?.ContactID || contact?.ID || contact?.id;
+}
+
+function getTicketId(ticket: any) {
+  return ticket?.TicketID || ticket?.TicketId || ticket?.ID || ticket?.id;
+}
+
 async function ateraRequest(path: string, options: RequestInit = {}) {
   const apiKey = process.env.ATERA_API_KEY;
 
@@ -57,22 +65,21 @@ async function ateraRequest(path: string, options: RequestInit = {}) {
 async function findContactByEmail(email: string) {
   const res = await ateraRequest("/contacts");
 
-  const contacts = Array.isArray(res)
-    ? res
-    : res?.items || res?.Items || [];
+  const contacts = Array.isArray(res) ? res : res?.items || res?.Items || [];
 
-  return contacts.find((c: any) =>
-    (c.Email || "").toLowerCase() === email.toLowerCase()
+  return contacts.find(
+    (contact: any) =>
+      String(contact.Email || contact.email || "").toLowerCase() ===
+      email.toLowerCase()
   );
 }
 
-async function createOrFindContact(
-  name: string,
-  email: string,
-  phone: string
-) {
+async function createOrFindContact(name: string, email: string, phone: string) {
   const existing = await findContactByEmail(email);
-  if (existing) return existing;
+
+  if (existing) {
+    return existing;
+  }
 
   const { firstName, lastName } = splitName(name);
 
@@ -87,22 +94,49 @@ async function createOrFindContact(
         Phone: phone || "",
       }),
     });
-  } catch (err: any) {
-    if (err.message.includes("409")) {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+
+    if (message.includes("409") || message.toLowerCase().includes("already exists")) {
       const retry = await findContactByEmail(email);
       if (retry) return retry;
     }
-    throw err;
+
+    throw error;
   }
 }
 
-function getContactId(contact: any) {
-  return (
-    contact?.EndUserID ||
-    contact?.ContactID ||
-    contact?.ID ||
-    contact?.id
-  );
+async function addTicketComment(ticketId: string | number, comment: string) {
+  const possiblePaths = [
+    `/tickets/${ticketId}/comments`,
+    `/tickets/${ticketId}/comment`,
+    `/ticket/${ticketId}/comments`,
+  ];
+
+  const possibleBodies = [
+    { Comment: comment, IsInternal: false },
+    { CommentText: comment, IsInternal: false },
+    { Text: comment, IsInternal: false },
+    { Body: comment, IsInternal: false },
+    { comment, is_internal: false },
+  ];
+
+  for (const path of possiblePaths) {
+    for (const body of possibleBodies) {
+      try {
+        await ateraRequest(path, {
+          method: "POST",
+          body: JSON.stringify(body),
+        });
+
+        return true;
+      } catch {
+        // Try next possible Atera comment format
+      }
+    }
+  }
+
+  return false;
 }
 
 export async function POST(req: Request) {
@@ -118,56 +152,49 @@ export async function POST(req: Request) {
     const details = clean(formData.get("details"));
     const file = formData.get("file") as File | null;
 
-    if (!name || !company || !email || !summary || !details) {
-      return Response.json({ error: "Missing fields" }, { status: 400 });
+    if (!name || !company || !email || !urgency || !summary || !details) {
+      return Response.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // ✅ Upload file
     let attachmentUrl = "";
 
     if (file && file.size > 0) {
-      const blob = await put(
-        `tickets/${Date.now()}-${file.name}`,
-        file,
-        { access: "public" }
-      );
+      const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "-");
+
+      const blob = await put(`tickets/${Date.now()}-${safeName}`, file, {
+        access: "public",
+      });
 
       attachmentUrl = blob.url;
     }
 
-    // ✅ Create/find contact
     const contact = await createOrFindContact(name, email, phone);
     const endUserId = getContactId(contact);
 
     if (!endUserId) {
-      throw new Error("No contact ID returned");
+      throw new Error(`Could not determine contact ID: ${JSON.stringify(contact)}`);
     }
 
-    // ✅ FORCE attachment into title so it's always visible
-    const ticketTitle = attachmentUrl
-      ? `[${urgency}] ${company} - ${summary} | ${attachmentUrl}`
-      : `[${urgency}] ${company} - ${summary}`;
+    const ticketTitle = `[${urgency}] ${company} - ${summary}`;
 
-    // ✅ Description
     const description = `
-New support request submitted from website
+New support request submitted from the Mainstay IT website.
 
 Name: ${name}
 Company: ${company}
 Email: ${email}
-Phone: ${phone || "N/A"}
+Phone: ${phone || "Not provided"}
 Urgency: ${urgency}
 
-Summary:
+Issue / Summary:
 ${summary}
 
 Details:
 ${details}
 
-${attachmentUrl ? `Attachment:\n${attachmentUrl}` : ""}
+${attachmentUrl ? `Attachment uploaded:\n${attachmentUrl}` : "Attachment: None"}
 `.trim();
 
-    // ✅ Create ticket
     const ticket = await ateraRequest("/tickets", {
       method: "POST",
       body: JSON.stringify({
@@ -180,15 +207,26 @@ ${attachmentUrl ? `Attachment:\n${attachmentUrl}` : ""}
       }),
     });
 
+    const ticketId = getTicketId(ticket);
+
+    if (ticketId && attachmentUrl) {
+      await addTicketComment(
+        ticketId,
+        `Attachment uploaded from the Mainstay IT website:\n\n${attachmentUrl}`
+      );
+    }
+
     return Response.json({
       success: true,
       ticket,
+      ticketId,
       attachmentUrl,
     });
-
   } catch (error) {
     return Response.json(
-      { error: error instanceof Error ? error.message : "Error" },
+      {
+        error: error instanceof Error ? error.message : "Failed to create ticket",
+      },
       { status: 500 }
     );
   }
