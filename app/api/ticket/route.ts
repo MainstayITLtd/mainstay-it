@@ -60,23 +60,15 @@ async function ateraRequest(path: string, options: RequestInit = {}) {
 
 async function findContactByEmail(email: string) {
   const res = await ateraRequest("/contacts");
-
-  const contacts = Array.isArray(res)
-    ? res
-    : res?.items || res?.Items || [];
+  const contacts = Array.isArray(res) ? res : res?.items || res?.Items || [];
 
   return contacts.find(
     (contact: any) =>
-      String(contact.Email || contact.email || "").toLowerCase() ===
-      email.toLowerCase()
+      String(contact.Email || contact.email || "").toLowerCase() === email.toLowerCase()
   );
 }
 
-async function createOrFindContact(
-  name: string,
-  email: string,
-  phone: string
-) {
+async function createOrFindContact(name: string, email: string, phone: string) {
   const existing = await findContactByEmail(email);
   if (existing) return existing;
 
@@ -98,6 +90,7 @@ async function createOrFindContact(
       const retry = await findContactByEmail(email);
       if (retry) return retry;
     }
+
     throw error;
   }
 }
@@ -115,26 +108,22 @@ export async function POST(req: Request) {
     const details = clean(formData.get("details"));
     const file = formData.get("file") as File | null;
 
-    if (!name || !company || !email || !summary || !details) {
+    if (!name || !company || !email || !urgency || !summary || !details) {
       return Response.json({ error: "Missing fields" }, { status: 400 });
     }
 
-    // ✅ Upload file
     let attachmentUrl = "";
 
     if (file && file.size > 0) {
       const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "-");
 
-      const blob = await put(
-        `tickets/${Date.now()}-${safeName}`,
-        file,
-        { access: "public" }
-      );
+      const blob = await put(`tickets/${Date.now()}-${safeName}`, file, {
+        access: "public",
+      });
 
       attachmentUrl = blob.url;
     }
 
-    // ✅ Contact
     const contact = await createOrFindContact(name, email, phone);
     const endUserId = getContactId(contact);
 
@@ -142,12 +131,10 @@ export async function POST(req: Request) {
       throw new Error("No contact ID returned");
     }
 
-    // ✅ Title WITH attachment (this is the reliable method)
     const ticketTitle = attachmentUrl
-      ? `[${urgency}] ${company} - ${summary} | ${attachmentUrl}`
-      : `[${urgency}] ${company} - ${summary}`;
+      ? `[${urgency}] ${company} - ${summary} | Details: ${details} | Attachment: ${attachmentUrl}`
+      : `[${urgency}] ${company} - ${summary} | Details: ${details}`;
 
-    // ✅ Description (clean)
     const description = `
 New support request submitted from website
 
@@ -162,9 +149,10 @@ ${summary}
 
 Details:
 ${details}
+
+${attachmentUrl ? `Attachment: ${attachmentUrl}` : "Attachment: None"}
 `.trim();
 
-    // ✅ Create ticket
     const ticket = await ateraRequest("/tickets", {
       method: "POST",
       body: JSON.stringify({
@@ -182,14 +170,10 @@ ${details}
       ticket,
       attachmentUrl,
     });
-
   } catch (error) {
     return Response.json(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to create ticket",
+        error: error instanceof Error ? error.message : "Failed to create ticket",
       },
       { status: 500 }
     );
