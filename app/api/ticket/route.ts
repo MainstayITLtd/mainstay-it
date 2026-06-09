@@ -28,10 +28,7 @@ function getContactId(contact: any) {
 
 async function ateraRequest(path: string, options: RequestInit = {}) {
   const apiKey = process.env.ATERA_API_KEY;
-
-  if (!apiKey) {
-    throw new Error("Missing ATERA_API_KEY");
-  }
+  if (!apiKey) throw new Error("Missing ATERA_API_KEY");
 
   const res = await fetch(`${ATERA_BASE_URL}${path}`, {
     ...options,
@@ -58,14 +55,36 @@ async function ateraRequest(path: string, options: RequestInit = {}) {
   return data;
 }
 
-async function findContactByEmail(email: string) {
-  const res = await ateraRequest("/contacts");
-  const contacts = Array.isArray(res) ? res : res?.items || res?.Items || [];
+function extractContacts(data: any) {
+  if (Array.isArray(data)) return data;
+  return data?.items || data?.Items || data?.value || data?.Value || [];
+}
 
-  return contacts.find(
-    (contact: any) =>
-      String(contact.Email || contact.email || "").toLowerCase() === email.toLowerCase()
-  );
+async function findContactByEmail(email: string) {
+  const cleanEmail = email.toLowerCase();
+
+  const paths = [
+    `/contacts?email=${encodeURIComponent(email)}`,
+    `/contacts?search=${encodeURIComponent(email)}`,
+    `/contacts`,
+  ];
+
+  for (const path of paths) {
+    try {
+      const res = await ateraRequest(path);
+      const contacts = extractContacts(res);
+
+      const match = contacts.find((contact: any) => {
+        return String(contact.Email || contact.email || "").toLowerCase() === cleanEmail;
+      });
+
+      if (match) return match;
+    } catch {
+      // Try next search method
+    }
+  }
+
+  return null;
 }
 
 async function createOrFindContact(name: string, email: string, phone: string) {
@@ -86,9 +105,16 @@ async function createOrFindContact(name: string, email: string, phone: string) {
       }),
     });
   } catch (error: any) {
-    if (error.message.includes("409")) {
+    const message = String(error?.message || "");
+
+    if (message.includes("409") || message.toLowerCase().includes("already exists")) {
       const retry = await findContactByEmail(email);
+
       if (retry) return retry;
+
+      throw new Error(
+        `Contact already exists in Atera, but the API could not find it by email: ${email}`
+      );
     }
 
     throw error;
@@ -128,7 +154,7 @@ export async function POST(req: Request) {
     const endUserId = getContactId(contact);
 
     if (!endUserId) {
-      throw new Error("No contact ID returned");
+      throw new Error(`Contact found but no ID was returned for ${email}`);
     }
 
     const ticketTitle = attachmentUrl
@@ -159,6 +185,7 @@ ${attachmentUrl ? `Attachment: ${attachmentUrl}` : "Attachment: None"}
         TicketTitle: ticketTitle,
         TicketDescription: description,
         EndUserID: endUserId,
+        EndUserEmail: email,
         CustomerID: PENTACO_CUSTOMER_ID,
         TicketPriority: getPriority(urgency),
         TicketStatus: "Open",
