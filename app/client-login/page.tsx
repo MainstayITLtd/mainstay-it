@@ -76,8 +76,8 @@ export default function ClientLogin() {
         <header className="mb-14 flex items-center justify-between">
           <a href="/">
             <img
-              src="/Logo%20290426.jpeg"
-              className="h-16 w-auto object-contain mix-blend-screen brightness-125 contrast-125 drop-shadow-[0_0_18px_rgba(255,255,255,0.18)] md:h-20"
+              src="/mainstay-logo.png"
+              className="h-16 w-auto object-contain"
               alt="Mainstay IT"
             />
           </a>
