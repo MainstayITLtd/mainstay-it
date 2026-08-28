@@ -21,6 +21,7 @@ export default function Home() {
           50% { transform: translate3d(45px, 35px, 0) scale(1.04); }
           100% { transform: translate3d(0, 0, 0) scale(1); }
         }
+
         @keyframes floatTwo {
           0% { transform: translate3d(0, 0, 0) scale(1); }
           50% { transform: translate3d(-40px, 30px, 0) scale(1.05); }
@@ -29,8 +30,14 @@ export default function Home() {
       `}</style>
 
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div className="absolute left-[-18%] top-[-18%] h-[850px] w-[850px] rounded-full bg-blue-500/18 blur-[180px]" style={{ animation: "floatOne 26s ease-in-out infinite" }} />
-        <div className="absolute right-[-18%] top-[12%] h-[780px] w-[780px] rounded-full bg-emerald-400/14 blur-[190px]" style={{ animation: "floatTwo 32s ease-in-out infinite" }} />
+        <div
+          className="absolute left-[-18%] top-[-18%] h-[850px] w-[850px] rounded-full bg-blue-500/18 blur-[180px]"
+          style={{ animation: "floatOne 26s ease-in-out infinite" }}
+        />
+        <div
+          className="absolute right-[-18%] top-[12%] h-[780px] w-[780px] rounded-full bg-emerald-400/14 blur-[190px]"
+          style={{ animation: "floatTwo 32s ease-in-out infinite" }}
+        />
         <div className="absolute bottom-[-28%] left-[25%] h-[850px] w-[850px] rounded-full bg-white/8 blur-[220px]" />
       </div>
 
@@ -45,11 +52,47 @@ export default function Home() {
           </a>
 
           <div className="flex items-center gap-4">
-            <a href="/client-login" className="hidden text-sm text-zinc-400 transition hover:text-white md:block">
+            <a
+              href="https://www.instagram.com/mainstay.it/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Mainstay IT on Instagram"
+              title="Follow Mainstay IT on Instagram"
+              className="hidden h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-zinc-300 backdrop-blur transition hover:border-emerald-400/50 hover:bg-white/10 hover:text-emerald-300 md:flex"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-5 w-5"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="5" />
+                <circle cx="12" cy="12" r="4" />
+                <circle
+                  cx="17.5"
+                  cy="6.5"
+                  r="1"
+                  fill="currentColor"
+                  stroke="none"
+                />
+              </svg>
+            </a>
+
+            <a
+              href="/client-login"
+              className="hidden text-sm text-zinc-400 transition hover:text-white md:block"
+            >
               Client Portal
             </a>
 
-            <a href="tel:07531993944" className="rounded-full border border-white/15 bg-white/5 px-5 py-2 text-sm font-medium text-zinc-100 backdrop-blur transition hover:bg-white hover:text-black">
+            <a
+              href="tel:07531993944"
+              className="rounded-full border border-white/15 bg-white/5 px-5 py-2 text-sm font-medium text-zinc-100 backdrop-blur transition hover:bg-white hover:text-black"
+            >
               07531 993944
             </a>
           </div>
@@ -70,10 +113,17 @@ export default function Home() {
             </p>
 
             <div className="mt-9 flex flex-col gap-4 sm:flex-row">
-              <a href="#contact" className="rounded-full bg-white px-7 py-3 text-center font-semibold text-black shadow-xl transition hover:-translate-y-0.5 hover:bg-zinc-200">
+              <a
+                href="#contact"
+                className="rounded-full bg-white px-7 py-3 text-center font-semibold text-black shadow-xl transition hover:-translate-y-0.5 hover:bg-zinc-200"
+              >
                 Get support
               </a>
-              <a href="#services" className="rounded-full border border-white/15 bg-white/5 px-7 py-3 text-center font-semibold text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/10">
+
+              <a
+                href="#services"
+                className="rounded-full border border-white/15 bg-white/5 px-7 py-3 text-center font-semibold text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/10"
+              >
                 View services
               </a>
             </div>
@@ -83,8 +133,11 @@ export default function Home() {
             <div className="mb-8 flex items-center justify-between gap-6">
               <div>
                 <p className="text-sm text-zinc-400">Business protection</p>
-                <p className="mt-1 text-3xl font-bold">Secure. Supported. Simple.</p>
+                <p className="mt-1 text-3xl font-bold">
+                  Secure. Supported. Simple.
+                </p>
               </div>
+
               <div className="rounded-full bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-emerald-300">
                 Active
               </div>
@@ -97,7 +150,10 @@ export default function Home() {
                 "Backup and recovery planning",
                 "Remote and onsite support",
               ].map((item) => (
-                <div key={item} className="flex items-center justify-between rounded-2xl border border-white/5 bg-black/35 p-4">
+                <div
+                  key={item}
+                  className="flex items-center justify-between rounded-2xl border border-white/5 bg-black/35 p-4"
+                >
                   <span className="text-zinc-200">{item}</span>
                   <span className="text-emerald-300">✓</span>
                 </div>
@@ -118,14 +174,20 @@ export default function Home() {
         </section>
 
         <section id="services" className="py-24">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-zinc-500">Services</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-zinc-500">
+            Services
+          </p>
+
           <h2 className="mt-4 max-w-3xl text-4xl font-bold tracking-tight md:text-5xl">
             Practical IT services that keep your business moving.
           </h2>
 
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {services.map(([title, text]) => (
-              <div key={title} className="rounded-3xl border border-white/10 bg-white/[0.05] p-7 backdrop-blur transition hover:-translate-y-1 hover:bg-white/[0.09]">
+              <div
+                key={title}
+                className="rounded-3xl border border-white/10 bg-white/[0.05] p-7 backdrop-blur transition hover:-translate-y-1 hover:bg-white/[0.09]"
+              >
                 <h3 className="text-xl font-bold">{title}</h3>
                 <p className="mt-4 text-sm leading-6 text-zinc-400">{text}</p>
               </div>
@@ -133,29 +195,76 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="contact" className="mb-20 rounded-[2rem] border border-white/10 bg-white p-8 text-black shadow-2xl md:p-12">
+        <section
+          id="contact"
+          className="mb-20 rounded-[2rem] border border-white/10 bg-white p-8 text-black shadow-2xl md:p-12"
+        >
           <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-zinc-500">Contact</p>
-              <h2 className="mt-4 text-4xl font-bold tracking-tight">Speak to Mainstay IT</h2>
+              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-zinc-500">
+                Contact
+              </p>
+
+              <h2 className="mt-4 text-4xl font-bold tracking-tight">
+                Speak to Mainstay IT
+              </h2>
+
               <p className="mt-5 max-w-xl leading-7 text-zinc-700">
                 Fill in the form and we’ll get back to you quickly to discuss your IT support requirements.
               </p>
 
               <div className="mt-8 rounded-3xl bg-zinc-100 p-6">
-                <p className="mb-3"><strong>Email:</strong> support@mainstayit.co.uk</p>
-                <p className="mb-3"><strong>Phone:</strong> 07531 993944</p>
-                <p><strong>Location:</strong> Norwich</p>
+                <p className="mb-3">
+                  <strong>Email:</strong> support@mainstayit.co.uk
+                </p>
+                <p className="mb-3">
+                  <strong>Phone:</strong> 07531 993944
+                </p>
+                <p>
+                  <strong>Location:</strong> Norwich
+                </p>
               </div>
             </div>
 
-            <form action="https://formspree.io/f/xrernwkk" method="POST" className="space-y-4">
-              <input type="text" name="name" placeholder="Your name" required className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black" />
-              <input type="email" name="email" placeholder="Email address" required className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black" />
-              <input type="text" name="company" placeholder="Company name" className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black" />
-              <textarea name="message" placeholder="How can we help?" required className="h-36 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black" />
+            <form
+              action="https://formspree.io/f/xrernwkk"
+              method="POST"
+              className="space-y-4"
+            >
+              <input
+                type="text"
+                name="name"
+                placeholder="Your name"
+                required
+                className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black"
+              />
 
-              <button type="submit" className="w-full rounded-full bg-black px-6 py-3 font-semibold text-white hover:bg-zinc-800">
+              <input
+                type="email"
+                name="email"
+                placeholder="Email address"
+                required
+                className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black"
+              />
+
+              <input
+                type="text"
+                name="company"
+                placeholder="Company name"
+                className="w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black"
+              />
+
+              <textarea
+                name="message"
+                placeholder="How can we help?"
+                required
+                className="h-36 w-full rounded-xl border border-zinc-300 px-4 py-3 outline-none focus:border-black"
+              />
+
+              <button
+                type="submit"
+                className="w-full rounded-full bg-black px-6 py-3 font-semibold text-white hover:bg-zinc-800"
+              >
                 Send enquiry
               </button>
             </form>
@@ -165,9 +274,21 @@ export default function Home() {
         <footer className="border-t border-white/10 py-8 text-sm text-zinc-500">
           <div className="flex flex-col justify-between gap-4 md:flex-row">
             <p>© Mainstay IT. Business IT support in Norwich.</p>
-            <a href="/client-login" className="hover:text-white">
-              Client Portal
-            </a>
+
+            <div className="flex items-center gap-4">
+              <a
+                href="https://www.instagram.com/mainstay.it/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition hover:text-white"
+              >
+                Instagram
+              </a>
+
+              <a href="/client-login" className="hover:text-white">
+                Client Portal
+              </a>
+            </div>
           </div>
         </footer>
       </div>
